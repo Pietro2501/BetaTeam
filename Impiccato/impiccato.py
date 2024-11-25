@@ -1,6 +1,7 @@
 import os
 import random
-import string
+import string #si tratta di un modulo standard che fornisce strumenti utili per la manipolazione e la gestione delle stringhe
+
 
 def pesca_parola(file_words: str):
     """
@@ -10,7 +11,7 @@ def pesca_parola(file_words: str):
     :param file_word: percorso al file contenente le parole da cui estrarne una casualmente
     :return: tuple
     """
-    with open(file_words, "r") as words_db:
+    with open(file_words, "r",encoding="utf-8") as words_db:
         words = words_db.readlines()
         words_clean = [word.strip() for word in words]
         word = random.choice(words_clean)
@@ -114,39 +115,51 @@ def game_control(game: int, game_contest: str = 'choice'):
                 print("Hai inserito un carattere non numerico")
     return game
 
+
 def guess_letter(word_list: list, wordwith_: list, game_status: int, vita: int, lista_lettere: list):
     word = "".join(word_list).upper()
     lettera = input('Inserisci una lettera dell\'alfabeto\n')
     lettera = lettera.upper()
-    alfabeto = string.ascii_uppercase  # Lettere maiuscole dell'alfabeto
-
-    if lettera not in alfabeto or len(lettera) != 1:
-        print(f'Hai inserito "{lettera}", non una lettera valida, perdi una vita')
+    alfabeto = string.ascii_uppercase  # mi restituisce le lettere maiuscole dell'alfabeto
+    accenti = "àèìòùéáó"
+    # print(alfabeto)
+    if alfabeto.find(
+            lettera) == -1 and accenti.find(lettera) ==1:  # il .find mi restituisce -1 se la sottostringa specificata (lettera) non è presente nella stringa principale (alfabeto)
+        print(f'Hai inserito {lettera}, non una lettera, perdi una vita')
+        print(mostraOmino(vita))
         vita -= 1
+        if vita == 0:
+            game_status = 0
+            print(f'Hai terminato le vite... la parola da indovinare era {word}\n')
+        return wordwith_, vita, game_status
     elif lettera in lista_lettere:
-        print(f'Hai già inserito la lettera "{lettera}", perdi una vita\n')
+        print(f'Hai già inserito la lettera {lettera}, perdi una vita\n')
         vita -= 1
+        if vita == 0:
+            game_status = 0
+            print(f'Hai terminato le vite... la parola da indovinare era {word}\n')
+        return wordwith_, vita, game_status
     else:
         lista_lettere.append(lettera)
-        if lettera in word:
-            print(f'Bravo! La lettera "{lettera}" è presente nella parola.\n')
-            for i in range(len(word)):
-                if lettera == word[i]:
-                    wordwith_[i] = lettera
-            if "_" not in wordwith_:
-                game_status = 0
-                print(f'Congratulazioni! Hai indovinato la parola "{word}"\n')
-        else:
-            print(f'La lettera "{lettera}" non è presente nella parola, perdi una vita\n')
-            vita -= 1
 
+    print(f'Hai inserito la lettera {lettera}\n')
+    is_notpresent = True
+    for i in range(len(word)):
+        if lettera == word[i]:
+            wordwith_[i] = lettera
+            is_notpresent = False
+    if is_notpresent:
+        print(f'La lettera {lettera} che hai scelto non è presente nella parola, perdi una vita\n')
+        vita -= 1
+        if vita == 0:
+            game_status = 0
+            print(f'Hai terminato le vite... la parola da indovinare era {word}\n')
+        return wordwith_, vita, game_status
 
     print(mostraOmino(vita))
-
-    if vita == 0:
+    if wordwith_.count('_') == 0:
         game_status = 0
-        print(f'Hai terminato le vite... la parola da indovinare era "{word}"\n')
-
+        print(f'Bravo, hai vinto! La parola era {word}\n')
     return wordwith_, vita, game_status
 
 def guess_word(word_list: list, game_status: bool, vita: int):
