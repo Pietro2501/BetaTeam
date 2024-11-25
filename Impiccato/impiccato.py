@@ -124,10 +124,10 @@ def guess_letter(word_list: list, wordwith_: list, game_status: int, vita: int, 
     accenti = "àèìòùéáó"
     # print(alfabeto)
     if alfabeto.find(
-            lettera) == -1 and accenti.find(lettera) ==1:  # il .find mi restituisce -1 se la sottostringa specificata (lettera) non è presente nella stringa principale (alfabeto)
+            lettera) == -1 and accenti.find(lettera) == -1:  # il .find mi restituisce -1 se la sottostringa specificata (lettera) non è presente nella stringa principale (alfabeto)
         print(f'Hai inserito {lettera}, non una lettera, perdi una vita')
-        print(mostraOmino(vita))
         vita -= 1
+        print(mostraOmino(vita))
         if vita == 0:
             game_status = 0
             print(f'Hai terminato le vite... la parola da indovinare era {word}\n')
@@ -151,6 +151,7 @@ def guess_letter(word_list: list, wordwith_: list, game_status: int, vita: int, 
     if is_notpresent:
         print(f'La lettera {lettera} che hai scelto non è presente nella parola, perdi una vita\n')
         vita -= 1
+        print(mostraOmino(vita))
         if vita == 0:
             game_status = 0
             print(f'Hai terminato le vite... la parola da indovinare era {word}\n')
