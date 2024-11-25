@@ -49,7 +49,7 @@ def game_control(game: int, game_contest: str = 'choice'):
 def load_images():
 
     images = []
-    for i in range(6):
+    for i in range(7):
         filename = f"hangman{i}.png"
         try:
             image = tk.PhotoImage(file=filename)
@@ -70,51 +70,52 @@ def guess_letter(word_list: list, wordwith_: list, game_status: int, vita: int, 
     word = "".join(word_list).upper()
     lettera = input('Inserisci una lettera dell\'alfabeto\n')
     lettera = lettera.upper()
-    alfabeto = string.ascii_uppercase  # Lettere maiuscole dell'alfabeto
-
-    if lettera not in alfabeto or len(lettera) != 1:
-        print(f'Hai inserito "{lettera}", non una lettera valida, perdi una vita')
+    alfabeto = string.ascii_uppercase  # mi restituisce le lettere maiuscole dell'alfabeto
+    accenti = "àèìòùéáó"
+    # print(alfabeto)
+    if alfabeto.find(
+            lettera) == -1 and accenti.find(lettera) == -1:  # il .find mi restituisce -1 se la sottostringa specificata (lettera) non è presente nella stringa principale (alfabeto)
+        print(f'Hai inserito {lettera}, non una lettera, perdi una vita')
         vita -= 1
-        image_label.config(image=images[get_image_index(vita)])  # Aggiorna l'immagine
+        image_label.config(image=images[get_image_index(vita)])
         root.update()
         if vita == 0:
             game_status = 0
-            print(f'Hai terminato le vite... la parola da indovinare era "{word}"\n')
+            print(f'Hai terminato le vite... la parola da indovinare era {word}\n')
         return wordwith_, vita, game_status
-
-    print(f'Hai inserito la lettera "{lettera}"\n')
-
-    if lettera in lista_lettere:
-        print(f'Hai già inserito la lettera "{lettera}", perdi una vita\n')
+    elif lettera in lista_lettere:
+        print(f'Hai già inserito la lettera {lettera}, perdi una vita\n')
         vita -= 1
-        image_label.config(image=images[get_image_index(vita)])  # Aggiorna l'immagine
-        root.update()
         if vita == 0:
             game_status = 0
-            print(f'Hai terminato le vite... la parola da indovinare era "{word}"\n')
-        return wordwith_, vita, game_status
-    lista_lettere.append(lettera)
 
+            print(f'Hai terminato le vite... la parola da indovinare era {word}\n')
+        return wordwith_, vita, game_status
+    else:
+        lista_lettere.append(lettera)
+
+    print(f'Hai inserito la lettera {lettera}\n')
     is_notpresent = True
     for i in range(len(word)):
         if lettera == word[i]:
             wordwith_[i] = lettera
             is_notpresent = False
     if is_notpresent:
-        print(f'La lettera "{lettera}" che hai scelto non è presente nella parola, perdi una vita\n')
+        print(f'La lettera {lettera} che hai scelto non è presente nella parola, perdi una vita\n')
         vita -= 1
-        image_label.config(image=images[get_image_index(vita)])  # Aggiorna l'immagine
+        image_label.config(image=images[get_image_index(vita)])
         root.update()
         if vita == 0:
             game_status = 0
-            print(f'Hai terminato le vite... la parola da indovinare era "{word}"\n')
-    else:
-        # Se la lettera è corretta, l'immagine rimane invariata
-        pass
+            print(f'Hai terminato le vite... la parola da indovinare era {word}\n')
+        return wordwith_, vita, game_status
+
+    image_label.config(image=images[get_image_index(vita)])
+    root.update()
 
     if wordwith_.count('_') == 0:
         game_status = 0
-        print(f'Bravo, hai vinto! La parola era "{word}"\n')
+        print(f'Bravo, hai vinto! La parola era {word}\n')
     return wordwith_, vita, game_status
 
 def guess_word(word_list: list, game_status: bool, vita: int):
@@ -124,15 +125,17 @@ def guess_word(word_list: list, game_status: bool, vita: int):
     if guess_word == word:
         game_status = 0
         print(f'Bravo, hai vinto! La parola era "{word}"\n')
-        return game_status, vita
     else:
         print('Hai sbagliato\n')
         vita -= 1
-        image_label.config(image=images[get_image_index(vita)])  # Aggiorna l'immagine
+
+        image_label.config(image=images[get_image_index(vita)])
         root.update()
         if vita == 0:
             game_status = 0
+
             print(f'Hai terminato le vite... la parola da indovinare era "{word}"\n')
+
     return game_status, vita
 
 
@@ -149,6 +152,8 @@ image_label.pack()
 
 image_label.config(image=images[0])
 root.update()
+
+
 
 game_choice = 2
 game_choice = game_control(game_choice)
