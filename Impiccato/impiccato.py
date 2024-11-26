@@ -160,6 +160,7 @@ def guess_letter(word_list: list, wordwith_: list, game_status: int, vita: int, 
     elif lettera in lista_lettere:
         print(f'Hai già inserito la lettera {lettera}, perdi una vita\n')
         vita -= 1
+        print(mostraOmino(vita))
         if vita == 0:
             game_status = 0
             print(f'Hai terminato le vite... la parola da indovinare era {word}\n')
@@ -227,7 +228,7 @@ game_choice = game_control(game_choice)
 
 while game_choice == 1:
     lista_letters = []
-    parola, len_parola, list_guess = pesca_parola(r"1000_parole_italiane_comuni.txt")
+    parola, len_parola, list_guess = pesca_parola(r"Impiccato/1000_parole_italiane_comuni.txt")
     list_char_word = [i for i in parola.upper()]
     tentativi = 6
     game_stat = 1
