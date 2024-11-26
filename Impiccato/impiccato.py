@@ -19,6 +19,14 @@ def pesca_parola(file_words: str):
         return word, len(word), ["_"] * len(word)
 
 def mostraOmino(tentativi):
+    """
+    Funzione che permette di stampare a video l'omino in base alle vite perse
+    
+    :type tentativi: int
+    :param tentativi: numero di tentativi rimanenti
+    
+    :return: int
+    """
     passi = [
         """
         --------
@@ -117,6 +125,23 @@ def game_control(game: int, game_contest: str = 'choice'):
 
 
 def guess_letter(word_list: list, wordwith_: list, game_status: int, vita: int, lista_lettere: list):
+    """
+    La funzione permette di prendere in input una parola casuale e una lista di '_' lunga quanto la parola. 
+    Successivamente gestisce i tentativi di inserire una lettera per indovinare la parola fin quando o si vince o si perde.
+    
+    :type word_list: list
+    :type wordwith_: list
+    :type game_status: int
+    :type vita: int
+    :type lista_lettere: list
+    :param word_list: parola selezionata
+    :param wordwith_: lista di '_' lunga quanto la parola selezionata
+    :param game_status: intero che varia tra 0 (uscire dal gioco) e 1 (continua a giocare) in base a come avanza il gioco
+    :param vita: contatore delle vite rimanenti
+    :param lista_lettere: lista delle lettere già 
+    
+    :return: tuple 
+    """
     word = "".join(word_list).upper()
     lettera = input('Inserisci una lettera dell\'alfabeto\n')
     lettera = lettera.upper()
@@ -164,6 +189,19 @@ def guess_letter(word_list: list, wordwith_: list, game_status: int, vita: int, 
     return wordwith_, vita, game_status
 
 def guess_word(word_list: list, game_status: bool, vita: int):
+    """
+    La funzione prende in input la parola e permette all'utente di indovinare la parola.
+    Se l'utente indovina il gioco finisce, mentre se sbaglia perde una vita e aggiorna l'omino.
+    
+    :type word_list: list
+    :type game_status: bool
+    :type vita: int
+    :param word_list: parola selezionata
+    :param game_status: intero che varia tra 0 (uscire dal gioco) e 1 (continua a giocare) in base a come avanza il gioco
+    :param vita: contatore delle vite rimanenti
+    
+    :return: tuple
+    """
     word = "".join(word_list).upper()
     guess_word = input('Indovina la parola: \n')
     guess_word = guess_word.upper()

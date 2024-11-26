@@ -49,6 +49,7 @@ def game_control(game: int, game_contest: str = 'choice'):
 def load_images():
 
     images = []
+
     for i in range(7):
         filename = f"hangman{i}.png"
         try:
@@ -160,7 +161,7 @@ game_choice = game_control(game_choice)
 
 while game_choice == 1:
     lista_letters = []
-    parola, len_parola, list_guess = pesca_parola(r"1000_parole_italiane_comuni.txt")
+    parola, len_parola, list_guess = pesca_parola(r"Impiccato/1000_parole_italiane_comuni.txt")
     list_char_word = [i for i in parola.upper()]
     tentativi = 6
     game_stat = 1
