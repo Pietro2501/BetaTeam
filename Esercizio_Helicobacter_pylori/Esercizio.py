@@ -1,8 +1,6 @@
 import os
 import regex
 
-
-
 def parse_fasta (file_name):
     os.path.exists(file_name)
     with open(file_name, 'r') as f:
@@ -28,8 +26,6 @@ helico = parse_fasta('Helicobacter_pylori_ATCC_700392.fa')
 #for match in kozak_pattern2.finditer(dizionario['ENST00000003084.11']):
     #print(match.group(),match.span())
 
-helico_pattern_fwd = regex.compile("GTGCCAGCMGCCGCGGTAA") #Primer fwd: GTGCCAGCMGCCGCGGTAA
-
 def comp_rev (nameseq):
     nameseq = nameseq.replace('\n','')
     reverse= nameseq[::-1]
@@ -38,9 +34,9 @@ def comp_rev (nameseq):
     comp_rev= nameseq.translate(table)[::-1]
     return comp,comp_rev
 
-fw_comp =comp_rev('GTGCCAGCMGCCGCGGTAA')[0]
-rev_comp = comp_rev('GGACTACNVGGGTWTCTAAT')[1]
-
+fw = 'GTGCCAGCMGCCGCGGTAA'
+rev = comp_rev('GGACTACNVGGGTWTCTAAT')[1]
+# print(rev)
 
 # W -> A o T
 # M -> A o C
@@ -48,16 +44,22 @@ rev_comp = comp_rev('GGACTACNVGGGTWTCTAAT')[1]
 # N -> A o T o C o G
 
 
-fw_comp_pattern = regex.compile('CACGGTCG[TG]CGGCGCCATT')
-rev_comp_pattern = regex.compile('ATTAGA[TA]ACCC[TGC][ACGT]GTAGTCC')
+fw_comp_pattern = regex.compile('GTGCCAGC[AC]GCCGCGGTAA')
+rev_comp_pattern = regex.compile('ATTAGA[AT]ACCC[TCG][ATCG]GTAGTCC')
 
-
+list_fwd=[]
+list_rev=[]
 
 for match in fw_comp_pattern.finditer(helico['4762fdd895094939_1'],overlapped=True):
-    print(match.group(), match.span())
+    # print(match.group(), match.span())
+    list_fwd.append(match.span()[1])
 
 for match in rev_comp_pattern.finditer(helico['4762fdd895094939_1'],overlapped=True):
-    print(match.group(), match.span())
+    # print(match.group(), match.span())
+    list_rev.append(match.span()[0])
 
-
+for j in list_rev:
+    for i in list_fwd:
+        if j-i >= 250 and j-i <= 350:
+            print(f"I possibili ampliconi associati ai primer usati vanno da {i} a {j} e la loro lunghezza è pari a: {j-i}")
 
