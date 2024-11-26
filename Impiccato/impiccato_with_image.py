@@ -10,7 +10,7 @@ def pesca_parola(file_words: str):
     :param file_word: percorso al file contenente le parole da cui estrarne una casualmente
     :return: tuple
     """
-    with open(file_words, "r") as words_db:
+    with open(file_words, "r",encoding="utf-8") as words_db:
         words = words_db.readlines()
         words_clean = [word.strip() for word in words]
         word = random.choice(words_clean)
