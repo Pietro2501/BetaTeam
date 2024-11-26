@@ -228,7 +228,7 @@ game_choice = game_control(game_choice)
 
 while game_choice == 1:
     lista_letters = []
-    parola, len_parola, list_guess = pesca_parola(r"Impiccato/1000_parole_italiane_comuni.txt")
+    parola, len_parola, list_guess = pesca_parola(r"1000_parole_italiane_comuni.txt")
     list_char_word = [i for i in parola.upper()]
     tentativi = 6
     game_stat = 1
