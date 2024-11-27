@@ -5,7 +5,7 @@ import string #si tratta di un modulo standard che fornisce strumenti utili per 
 
 def pesca_parola(file_words: str):
     """
-    Dando in input il percorso ad un file contenente un db di parole, la funzione ne restituisce una a caso e la sua lunghezza
+    Dando in input il percorso ad un file contenente una lista di parole, la funzione ne restituisce una a caso e la sua lunghezza
 
     :type file_word: str
     :param file_word: percorso al file contenente le parole da cui estrarne una casualmente
@@ -138,7 +138,7 @@ def guess_letter(word_list: list, wordwith_: list, game_status: int, vita: int, 
     :param wordwith_: lista di '_' lunga quanto la parola selezionata
     :param game_status: intero che varia tra 0 (uscire dal gioco) e 1 (continua a giocare) in base a come avanza il gioco
     :param vita: contatore delle vite rimanenti
-    :param lista_lettere: lista delle lettere già 
+    :param lista_lettere: lista delle lettere già utilizzate
     
     :return: tuple 
     """
@@ -148,8 +148,7 @@ def guess_letter(word_list: list, wordwith_: list, game_status: int, vita: int, 
     alfabeto = string.ascii_uppercase  # mi restituisce le lettere maiuscole dell'alfabeto
     accenti = "àèìòùéáó"
     # print(alfabeto)
-    if alfabeto.find(
-            lettera) == -1 and accenti.find(lettera) == -1:  # il .find mi restituisce -1 se la sottostringa specificata (lettera) non è presente nella stringa principale (alfabeto)
+    if alfabeto.find(lettera) == -1 and accenti.find(lettera) == -1:  # il .find mi restituisce -1 se la sottostringa specificata (lettera) non è presente nella stringa principale (alfabeto)
         print(f'Hai inserito {lettera}, non una lettera, perdi una vita')
         vita -= 1
         print(mostraOmino(vita))
