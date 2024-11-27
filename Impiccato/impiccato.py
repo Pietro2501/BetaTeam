@@ -138,7 +138,7 @@ def guess_letter(word_list: list, wordwith_: list, game_status: int, vita: int, 
     :param wordwith_: lista di '_' lunga quanto la parola selezionata
     :param game_status: intero che varia tra 0 (uscire dal gioco) e 1 (continua a giocare) in base a come avanza il gioco
     :param vita: contatore delle vite rimanenti
-    :param lista_lettere: lista delle lettere già 
+    :param lista_lettere: lista delle lettere già utilizzate
     
     :return: tuple 
     """
