@@ -44,11 +44,11 @@ list_rev=[]
 
 for match in fw_comp_pattern.finditer(helico['4762fdd895094939_1'],overlapped=True):
     # print(match.group(), match.span())
-    list_fwd.append(match.span()[1])
+    list_fwd.append(match.span()[0])
 
 for match in rev_comp_pattern.finditer(helico['4762fdd895094939_1'],overlapped=True):
     # print(match.group(), match.span())
-    list_rev.append(match.span()[0])
+    list_rev.append(match.span()[1])
 
 for j in list_rev:
     for i in list_fwd:
