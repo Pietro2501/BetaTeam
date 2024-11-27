@@ -5,7 +5,7 @@ import tkinter as tk
 
 def pesca_parola(file_words: str):
     """
-    Dando in input il percorso ad un file contenente un db di parole, la funzione ne restituisce una a caso e la sua lunghezza
+    Dando in input il percorso ad un file contenente una lista di parole, la funzione ne restituisce una a caso e la sua lunghezza
     :type file_word: str
     :param file_word: percorso al file contenente le parole da cui estrarne una casualmente
     :return: tuple
