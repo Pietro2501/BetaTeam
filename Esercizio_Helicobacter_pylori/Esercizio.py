@@ -18,14 +18,6 @@ def parse_fasta (file_name):
 helico = parse_fasta('Helicobacter_pylori_ATCC_700392.fa')
 #print(helico)
 
-
-
- # Primer reverse: GGACTACNVGGGTWTCTAAT
-
-#kozak_pattern2 = re.compile("(GCC)?([AG]CCATG[ACGT])")#GCC non molto conservata quindi metto in gruppo e la cerco 0 o più volte,opzionale
-#for match in kozak_pattern2.finditer(dizionario['ENST00000003084.11']):
-    #print(match.group(),match.span())
-
 def comp_rev (nameseq):
     nameseq = nameseq.replace('\n','')
     reverse= nameseq[::-1]
