@@ -146,10 +146,9 @@ def guess_letter(word_list: list, wordwith_: list, game_status: int, vita: int, 
     lettera = input('Inserisci una lettera dell\'alfabeto\n')
     lettera = lettera.upper()
     alfabeto = string.ascii_uppercase  # mi restituisce le lettere maiuscole dell'alfabeto
-    accenti = "àèìòùéáó"
+    accenti = 'ÀÈÌÒÙÉÁÓ'
     # print(alfabeto)
-    if alfabeto.find(
-            lettera) == -1 and accenti.find(lettera) == -1:  # il .find mi restituisce -1 se la sottostringa specificata (lettera) non è presente nella stringa principale (alfabeto)
+    if alfabeto.find(lettera) == -1 and accenti.find(lettera) == -1:  # il .find mi restituisce -1 se la sottostringa specificata (lettera) non è presente nella stringa principale (alfabeto)
         print(f'Hai inserito {lettera}, non una lettera, perdi una vita')
         vita -= 1
         print(mostraOmino(vita))
@@ -228,7 +227,7 @@ game_choice = game_control(game_choice)
 
 while game_choice == 1:
     lista_letters = []
-    parola, len_parola, list_guess = pesca_parola(r"1000_parole_italiane_comuni.txt")
+    parola, len_parola, list_guess = pesca_parola(r"Impiccato\1000_parole_italiane_comuni.txt")
     list_char_word = [i for i in parola.upper()]
     tentativi = 6
     game_stat = 1
