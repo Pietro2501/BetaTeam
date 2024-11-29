@@ -18,7 +18,7 @@ def parse_fasta (file_name):
 helico = parse_fasta('Helicobacter_pylori_ATCC_700392.fa')
 #print(helico)
 
-def comp_rev (nameseq):
+def fn_comp_rev (nameseq):
     nameseq = nameseq.replace('\n','')
     reverse= nameseq[::-1]
     table= str.maketrans('ACTG','TGAC')
@@ -27,7 +27,7 @@ def comp_rev (nameseq):
     return comp,comp_rev
 
 fw = 'GTGCCAGCMGCCGCGGTAA'
-rev = comp_rev('GGACTACNVGGGTWTCTAAT')[1]
+rev_comp = fn_comp_rev('GGACTACNVGGGTWTCTAAT')[1]
 # print(rev)
 
 # W -> A o T
