@@ -75,8 +75,9 @@ def print_graph(g):
     V = g[0]
     E = g[1]
     for k in V.keys():
-        print "name: ", V[k].label, ". indegree: ", V[k].indegree, ". outdegree: ", V[k].outdegree
-        print "Edges: "
+        print (f"Node name: {V[k].label}. indegree: {V[k].indegree}. outdegree: {V[k].outdegree}")
+        print ("Edges: ")
+        edges=[]
         for e in E[k]:
-            print e.label
-        print
+            edges.append(e.label)
+        print(set(edges))
