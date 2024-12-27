@@ -34,9 +34,9 @@ def construct_graph(reads, k):
             v2 = read[i+1:i+k+1]
             if v1 in edges.keys():
                 vertices[v1].outdegree += 1
-                for instance in edges[v1]:
-                    if instance.label != v2:
-                        edges[v1].append(Edge(v2))
+                # for instance in edges[v1]:
+                #     if instance.label != v2:
+                edges[v1].append(Edge(v2))
             else:
                 vertices[v1] = Node(v1)
                 vertices[v1].outdegree += 1
