@@ -34,7 +34,7 @@ def read_reads(fname):
 
     for line in lines:
         if line[0] != '>':
-            reads = reads + [line.rstrip()]
+            reads.append(line.rstrip())
 
     return reads
 
