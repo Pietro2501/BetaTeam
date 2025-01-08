@@ -39,12 +39,12 @@ def read_reads(fname):
     return reads
 
 
-def parser_fastq(filename):
-    from Bio import SeqIO
-    import gzip
-    with gzip.open(filename, "rt") as file:
-        listaseq = [str(seq_record.seq) for seq_record in SeqIO.parse(file, "fastq")]
-    return listaseq
+# def parser_fastq(filename):
+#     from Bio import SeqIO
+#     import gzip
+#     with gzip.open(filename, "rt") as file:
+#         listaseq = [str(seq_record.seq) for seq_record in SeqIO.parse(file, "fastq")]
+#     return listaseq
 
 
 def construct_graph(reads, k):
@@ -58,17 +58,13 @@ def construct_graph(reads, k):
             n1 = Node(read[i:i + k - 1])
             n2 = Node(read[i + 1:i + k])
 
-            for node in nodes:
-                if node == n1:
-                    node.incrementa_contatore()
-                    break
+            if n1 in nodes:
+                n1.incrementa_contatore()
             else:
                 nodes.add(n1)
 
-            for node in nodes:
-                if node == n2:
-                    node.incrementa_contatore()
-                    break
+            if n2 in nodes:
+                n2.incrementa_contatore()
             else:
                 nodes.add(n2)
 
@@ -106,7 +102,7 @@ def output_contigs(g):
             next_edge = outcoming_edges[0]
         else:  # se ci sono più archi, scegli quello il cui nodo di arrivo abbia il contatore maggiore
             best_edge = None
-            max_contatore = -1
+            max_contatore = -1 #metto -1 per avere un valore di riferimento fuori dominio tra i contatori
 
             for edge in outcoming_edges:
                 destination_label = edge.label[1:]
@@ -125,8 +121,9 @@ def output_contigs(g):
 
             next_edge = best_edge
 
-        edges.remove(next_edge)  # rimuovi l'arco dalla lista degli archi
         contig += next_edge.label[-1]  # aggiungi l'ultimo carattere del k-mer al contig
+        edges.remove(next_edge)  # rimuovi l'arco dalla lista degli archi
+
 
         destination_label = next_edge.label[1:]  # definisco il nodo successivo per ricostruire il contig
         current = None
@@ -142,6 +139,6 @@ def output_contigs(g):
 
 fname = 'g200reads.fa'
 reads = read_reads(fname)
-g = construct_graph(reads, 5)
+g = construct_graph(reads, 9)
 contig = output_contigs(g)
 print(contig)
