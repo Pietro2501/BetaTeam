@@ -208,3 +208,9 @@ def output_contigs(g):
             raise ValueError(f"Errore: il nodo successivo con label {destination_label} non è stato trovato nel grafo.")
 
     return contig
+
+len(dict_fastq)
+len(seq_filtered)
+g = construct_graph(seq_filtered, 25)
+contig = output_contigs(g)
+print(len(contig))
