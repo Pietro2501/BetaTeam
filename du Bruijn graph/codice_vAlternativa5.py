@@ -1,8 +1,4 @@
 from BioSequence import tools_Bio as t
-import time
-
-from trimming import dinamic_trimming
-
 
 class Node:
     """ Classe associata al nodo, utile a definire in seguito il grafo di de Brujin"""
@@ -109,11 +105,11 @@ def dinamic_trimming(dict_fastq: dict, treshold=25, window=15):
             dict_fastq[key].update({"ASCII_qual": dict_fastq[key]["ASCII_qual"][len(list_mean):]})
     return dict_fastq
 
-def dict_filter(_dict_fastq):
+def dict_filter(_dict_fastq, k):
     list_keys = list(_dict_fastq.keys())
     for key in list_keys:
         expect_err = exp_err(_dict_fastq[key]["qual"])
-        if expect_err > 3:
+        if expect_err > k:
             del _dict_fastq[key]
     return _dict_fastq
 
@@ -125,10 +121,11 @@ keys = list(dict_fastq_f.keys())[:10]
 #     print(dict_fastq_f[acc]["seq"], len (dict_fastq_f[acc]["seq"]))
 #     print(dict_fastq_f[acc]["qual"])
 dict_filtered_f = dinamic_trimming(dict_fastq_f)
+dict_double_filtered_f = dict_filter(dict_filtered_f, 3)
 # for acc in keys:
 #     print(dict_filtered_f[acc]["seq"], len (dict_filtered_f[acc]["seq"]))
 #     print(dict_filtered_f[acc]["qual"])
-seq_filtered_f = [dict_filtered_f[key]["seq"] for key in dict_filtered_f.keys() if len(dict_filtered_f[key]["seq"]) > 100]
+seq_filtered_f = [dict_double_filtered_f[key]["seq"] for key in dict_double_filtered_f.keys() if len(dict_double_filtered_f[key]["seq"]) > 100]
 
 
 file_r= t.extract_info(r"PhoeVulATCC8482_R2.fq.gz")
@@ -138,10 +135,11 @@ keys_r = list(dict_fastq_r.keys())[:10]
 #     print(dict_fastq_r[acc]["seq"], len (dict_fastq_r[acc]["seq"]))
 #     print(dict_fastq_r[acc]["qual"])
 dict_filtered_r = dinamic_trimming(dict_fastq_r)
+dict_double_filtered_r = dict_filter(dict_filtered_r, 4)
 # for acc in keys_r:
 #     print(dict_filtered_r[acc]["seq"], len (dict_filtered_r[acc]["seq"]))
 #     print(dict_filtered_r[acc]["qual"])
-seq_filtered_r = [dict_filtered_r[key]["seq"] for key in dict_filtered_r.keys() if len(dict_filtered_r[key]["seq"]) > 100]
+seq_filtered_r = [dict_double_filtered_r[key]["seq"] for key in dict_double_filtered_r.keys() if len(dict_double_filtered_r[key]["seq"]) > 100]
 print(len(seq_filtered_r), len(seq_filtered_f))
 
 mucchio_selvaggio = seq_filtered_f + seq_filtered_r
@@ -150,9 +148,11 @@ mucchio_selvaggio = seq_filtered_f + seq_filtered_r
 
 def rev_comp(seqlist):
     table= str.maketrans('ACTG','TGAC')
-    total_list = [seq.translate(table)[::-1] for seq in seqlist] + seqlist
+    total_list = [seq.translate(table)[::-1] for seq in seqlist]
     return total_list
 
+mucchio_selvaggio_comp_rev = rev_comp(mucchio_selvaggio)
+delirio_totale = mucchio_selvaggio + mucchio_selvaggio_comp_rev
 
 # def read_reads(fname):
 #     """ FUnzione di prova che genera una lista di sequenza e prende in input un file FASTA (per ora) """
@@ -251,7 +251,7 @@ def output_contigs(g):
     current = start
 
     while True:
-        outcoming_edges = [edge for edge in edges if
+        outcoming_edges = [edge for edge in edges.values() if
                            edge.label.startswith(current.label)]  # trovo gli archi che partono dal nodo corrente
 
         if len(outcoming_edges) == 0:
@@ -279,7 +279,7 @@ def output_contigs(g):
 
             next_edge = best_edge
 
-        edges.remove(next_edge)  # rimuovi l'arco dalla lista degli archi
+        del edges[next_edge.label]  # rimuovi l'arco dalla lista degli archi
         contig += next_edge.label[-1]  # aggiungi l'ultimo carattere del k-mer al contig
 
         destination_label = next_edge.label[1:]  # definisco il nodo successivo per ricostruire il contig
@@ -294,8 +294,13 @@ def output_contigs(g):
 
     return contig
 
-#print(len(seq_filtered_f), len(seq_filtered_r), len(mucchio_selvaggio)) # mucchio_selvaggio = seq_filtered_f + seq_filtered_r
-#print(len(rev_comp(mucchio_selvaggio)))
-#prova = construct_graph(rev_comp(mucchio_selvaggio), 23)
-#contig = output_contigs(prova)
-#print(contig)
+# print(len(seq_filtered_f), len(seq_filtered_r), len(mucchio_selvaggio)) # mucchio_selvaggio = seq_filtered_f + seq_filtered_r
+# print(len(rev_comp(mucchio_selvaggio)))
+# prova = construct_graph(rev_comp(mucchio_selvaggio), 23)
+# contig = output_contigs(prova)
+# print(contig)
+
+print(len(seq_filtered_f), len(seq_filtered_r), len(mucchio_selvaggio), len(mucchio_selvaggio_comp_rev), len(delirio_totale)) # mucchio_selvaggio = seq_filtered_f + seq_filtered_r
+de_brujin_graph = construct_graph(delirio_totale, 29)
+contig = output_contigs(de_brujin_graph)
+print(len(contig))
