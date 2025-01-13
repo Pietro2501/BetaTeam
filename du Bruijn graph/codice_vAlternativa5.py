@@ -5,14 +5,23 @@ from trimming import dinamic_trimming
 
 
 class Node:
-    """ Classe associata al nodo, utile a definire in seguito il grafo di de Brujin"""
+    """
+    Represents a node with a label and an internal counter.
+
+    The Node class provides the ability to uniquely identify nodes
+    through a label and includes an internal counter that can be
+    incremented. Nodes are hashable and support equality comparison
+    based on their label.
+
+    :ivar label: The label identifying the node.
+    :type label: Any
+    :ivar contatore: An internal counter associated with the node.
+    :type contatore: int
+    """
 
     def __init__(self, lab):
         self.label = lab
         self.contatore = 0
-
-    def __hash__(self):
-        return hash(self.label)
 
     def __eq__(self, other):
         return self.label == other.label
@@ -21,7 +30,17 @@ class Node:
         self.contatore += 1
 
 class Edge:
-    """ Classe associata all'edge, utile a definire in seguito il grafo di de Brujin"""
+    """
+    Represents an edge in the graph structure using a k-1 mer tuple.
+
+    This class is designed to model edges where the labels are constructed
+    from a pair of k-1 mers and extend their sequence by overlapping the final
+    character of the second k-1 mer. The equality of edges is determined by
+    comparing their labels.
+
+    :ivar label: Label of the edge formed by merging two k-1 mers.
+    :type label: str
+    """
 
     def __init__(self, km1mer_tuple):
         self.label = km1mer_tuple[0] + km1mer_tuple[1][-1:]
@@ -31,10 +50,20 @@ class Edge:
 
 def parse_fastq(file_obj, offset=33) -> dict:
     """
+    Parses a FASTQ file and retrieves its content in the form of a dictionary. Each record in the
+    FASTQ file includes the accession line, sequence, and quality values. The function also
+    calculates the decoded quality scores from the given ASCII quality values based on the
+    provided offset. The function ensures coherence in the format of the accession and plus lines.
 
-    :param file_obj:
-    :param offset:
-    :return:
+    :param file_obj: The file path to the FASTQ file to be parsed.
+    :type file_obj: str
+    :param offset: Quality score offset, which is expected to be either 33 or 64. Used to decode
+        ASCII quality scores into numeric values. Default is 33.
+    :type offset: int, optional
+    :return: A dictionary representing the parsed FASTQ file. The keys are the accession lines, and
+        the values contain a dictionary of sequence, ASCII quality values, and decoded quality scores.
+        If the file is corrupted or the offset is invalid, returns None.
+    :rtype: dict or None
     """
     with open(file_obj, "r") as file_obj:
         def check_offset(offset: int) -> bool:
@@ -44,6 +73,18 @@ def parse_fastq(file_obj, offset=33) -> dict:
             return res
 
         def check_coherence(acc: str, plus: str) -> bool:
+            """
+            Checks the coherence of a FASTQ record based on the given accession line and
+            plus line. A FASTQ record is considered coherent if the accession line starts
+            with "@" and the plus line starts with "+".
+
+            :param acc: The accession line from the FASTQ record.
+            :type acc: str
+            :param plus: The plus line from the FASTQ record.
+            :type plus: str
+            :return: A boolean indicating whether the FASTQ record is coherent.
+            :rtype: bool
+            """
             res = False
             if acc.startswith("@") and plus.startswith("+"):
                 res = True
@@ -77,13 +118,52 @@ def parse_fastq(file_obj, offset=33) -> dict:
 
 
 def exp_err(qual, is_ascii=False):
+    """Calculate the total expected error of a sequence's quality scores.
+
+    Args:
+        qual (str or list): Quality scores, either as a string of ASCII-encoded characters
+                            or a list of numeric values.
+        is_ascii (bool): A flag indicating if the input is ASCII-encoded (True) or numeric (False).
+
+    Returns:
+        float: The total expected error, calculated as a sum of probabilities.
+
+    Raises:
+        ValueError: If input is not a string or a list of numeric values.
+    """
     if is_ascii:
-        ee = sum(map(lambda q: 10 ** (q / -10), map(lambda x: ord(x) - 33, qual)))
+        try:
+            ee = sum(map(lambda q: 10 ** (q / -10), map(lambda x: ord(x) - 33, qual)))
+        except TypeError:
+            raise ValueError("Input quality scores must be a string for ASCII-encoded values.")
     else:
-        ee = sum(map(lambda q: 10 ** (q / -10), qual))
+        try:
+            ee = sum(map(lambda q: 10 ** (q / -10), qual))
+        except TypeError:
+            raise ValueError("Input quality scores must be a list of numeric values.")
     return ee
 
 def hard_trimming(dict_fastq: dict, treshold=20):
+    """
+    Perform hard trimming of FASTQ sequence data by removing low-quality bases from the
+    beginning of sequences. This method updates the sequence (`seq`), quality scores
+    (`qual`), and ASCII-encoded quality scores (`ASCII_qual`) for each key in the
+    provided dictionary, starting from the first base that meets or exceeds the
+    specified quality threshold.
+
+    :param dict_fastq: Dictionary containing FASTQ data for processing. Each key in
+        the dictionary corresponds to a record, and its value is a dictionary with
+        the keys: `seq` (sequence string), `qual` (quality score list),
+        and `ASCII_qual` (ASCII-encoded quality scores).
+    :type dict_fastq: dict
+    :param treshold: Quality score threshold to determine the starting position for
+        trimming. Default is 20.
+    :type treshold: int
+    :return: Updated `dict_fastq` dictionary after hard trimming has been applied
+        to all entries.
+    :rtype: dict
+    """
+
     for key in dict_fastq.keys():
         for value in range(len(dict_fastq[key]["qual"])):
             if dict_fastq[key]["qual"][value] > treshold:
@@ -95,6 +175,26 @@ def hard_trimming(dict_fastq: dict, treshold=20):
     return dict_fastq
 
 def dinamic_trimming(dict_fastq: dict, treshold=25, window=15):
+    """
+    Perform dynamic trimming of FASTQ sequence data by removing low-quality bases from the
+    beginning of sequences. This method updates the sequence (`seq`), quality scores
+    (`qual`), and ASCII-encoded quality scores (`ASCII_qual`) for each key in the
+    provided dictionary, starting from the first base that meets or exceeds the
+    specified quality threshold.
+
+    :param dict_fastq: Dictionary containing FASTQ data for processing. Each key in
+        the dictionary corresponds to a record, and its value is a dictionary with
+        the keys: `seq` (sequence string), `qual` (quality score list),
+        and `ASCII_qual` (ASCII-encoded quality scores).
+    :type dict_fastq: dict
+    :param treshold: Quality score threshold to determine the starting position for
+        trimming. Default is 20.
+    :type treshold: int
+    :return: Updated `dict_fastq` dictionary after hard trimming has been applied
+        to all entries.
+    :rtype: dict
+
+    """
     for key in dict_fastq.keys():
         quality = dict_fastq[key]["qual"]
         list_mean = quality[:window]
@@ -110,6 +210,23 @@ def dinamic_trimming(dict_fastq: dict, treshold=25, window=15):
     return dict_fastq
 
 def dict_filter(_dict_fastq):
+    """
+    Filters a dictionary of FASTQ entries by expected error threshold.
+
+    This function takes a dictionary of FASTQ entries and evaluates the expected
+    error based on the "qual" field within each entry. If the expected error
+    exceeds a specified threshold (here, 3), the corresponding entry is removed
+    from the dictionary.
+
+    :param _dict_fastq: Dictionary containing FASTQ entries, where keys are
+        identifiers and values are dictionaries with a "qual" field
+        representing quality scores.
+    :type _dict_fastq: dict
+
+    :return: A filtered dictionary containing only the FASTQ entries
+        where the expected error is 3 or less.
+    :rtype: dict
+    """
     list_keys = list(_dict_fastq.keys())
     for key in list_keys:
         expect_err = exp_err(_dict_fastq[key]["qual"])
@@ -149,6 +266,22 @@ mucchio_selvaggio = seq_filtered_f + seq_filtered_r
 
 
 def rev_comp(seqlist):
+    """
+    Generate the reverse complement for a list of DNA sequences and combine it with the
+    original sequences.
+
+    Given a list of DNA sequences, this function computes the reverse complement of
+    each sequence by translating the nucleotides (A ↔ T, C ↔ G), and then reverses it.
+    The resulting reverse complement sequences are combined with the original list
+    of sequences and returned as a single list.
+
+    :param seqlist: List of DNA sequences for which reverse complements are to
+        be generated.
+    :type seqlist: list[str]
+    :return: Combined list containing original sequences and their respective
+        reverse complements.
+    :rtype: list[str]
+    """
     table= str.maketrans('ACTG','TGAC')
     total_list = [seq.translate(table)[::-1] for seq in seqlist] + seqlist
     return total_list
@@ -202,7 +335,20 @@ def rev_comp(seqlist):
 #     return edges, nodes
 
 def construct_graph(reads, k):
-    """Costruisco il grafo di de Bruijn ottimizzando la ricerca con un dizionario"""
+    """
+    Constructs a graph from a list of reads using a k-mer approach. The function generates edges
+    and nodes based on overlapping k-1 subsequences from each read. The edges and nodes are
+    stored in dictionaries.
+
+    :param reads: A list of strings representing DNA reads.
+    :type reads: list[str]
+    :param k: The size of the k-mers used for graph construction.
+    :type k: int
+    :return: A tuple containing a dictionary of edges and a dictionary of nodes. The edges
+             dictionary maps edge labels to Edge objects, and the nodes dictionary maps node
+             labels to Node objects.
+    :rtype: tuple[dict[str, Edge], dict[str, Node]]
+    """
     edges = {}
     nodes = {}
 
@@ -230,7 +376,27 @@ def construct_graph(reads, k):
     return edges, nodes
 
 def output_contigs(g):
-    """ Applica il percorso Euleriano per ricostruire la sequenza originaria """
+    """
+    Generate a contiguous sequence (contig) from a graph structure.
+
+    The function attempts to generate a contig from a graph represented by
+    nodes and edges. Starting from a node with outgoing edges but no
+    incoming edges, it traverses the graph by following edges with criteria
+    to select the next edge when multiple options are available.
+
+    :param g:
+        A tuple containing the graph data structure. The first element is a
+        dictionary of edges, where each edge is represented by an object with
+        a `label` attribute. The second element is a dictionary of nodes,
+        each represented by an object with labels (`label`) and a `contatore`
+        attribute that acts as a counter.
+    :return:
+        A string representing the generated contig by traversing the graph
+        according to the described logic.
+    :raises ValueError:
+        If a starting node cannot be found, invalid edges exist, or a
+        destination node is missing during traversal.
+    """
     edges, nodes = g
     start = None
     for node in nodes.values():
