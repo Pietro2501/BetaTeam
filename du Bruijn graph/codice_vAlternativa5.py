@@ -121,7 +121,7 @@ keys = list(dict_fastq_f.keys())[:10]
 #     print(dict_fastq_f[acc]["seq"], len (dict_fastq_f[acc]["seq"]))
 #     print(dict_fastq_f[acc]["qual"])
 dict_filtered_f = dinamic_trimming(dict_fastq_f)
-dict_double_filtered_f = dict_filter(dict_filtered_f, 3)
+dict_double_filtered_f = dict_filter(dict_filtered_f, 4)
 # for acc in keys:
 #     print(dict_filtered_f[acc]["seq"], len (dict_filtered_f[acc]["seq"]))
 #     print(dict_filtered_f[acc]["qual"])
@@ -135,7 +135,7 @@ keys_r = list(dict_fastq_r.keys())[:10]
 #     print(dict_fastq_r[acc]["seq"], len (dict_fastq_r[acc]["seq"]))
 #     print(dict_fastq_r[acc]["qual"])
 dict_filtered_r = dinamic_trimming(dict_fastq_r)
-dict_double_filtered_r = dict_filter(dict_filtered_r, 4)
+dict_double_filtered_r = dict_filter(dict_filtered_r, 5)
 # for acc in keys_r:
 #     print(dict_filtered_r[acc]["seq"], len (dict_filtered_r[acc]["seq"]))
 #     print(dict_filtered_r[acc]["qual"])
