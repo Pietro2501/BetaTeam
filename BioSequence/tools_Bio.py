@@ -93,15 +93,16 @@ def whiskers(prim: float, terz: float, IQR: float):
     higher = terz + 1.5*IQR
     return lower, higher
 
-def calc_k_mer(k,contenuto):
+def calc_k_mer(k,list_seq:list):
     """
     :param k:
     :param contenuto:
     :return:
     """
-    kmer_diz={}
-    for i in range(0,len(contenuto)-k+1):
-        kmer = contenuto[i:i+k]
-        kmer_diz.setdefault(kmer, 0)
-        kmer_diz[kmer] += 1
+    kmer_diz = {}
+    for seq in list_seq:
+        for i in range(0,len(seq)-k+1):
+            kmer = seq[i:i+k]
+            kmer_diz.setdefault(kmer, 0)
+            kmer_diz[kmer] += 1
     return kmer_diz
