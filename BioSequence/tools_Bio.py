@@ -103,6 +103,9 @@ def calc_k_mer(k,list_seq:list):
     for seq in list_seq:
         for i in range(0,len(seq)-k+1):
             kmer = seq[i:i+k]
-            kmer_diz.setdefault(kmer, 0)
-            kmer_diz[kmer] += 1
+            if "N" not in  kmer.upper():
+                kmer_diz.setdefault(kmer, 0)
+                kmer_diz[kmer] += 1
+            else:
+                continue
     return kmer_diz
