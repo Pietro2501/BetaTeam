@@ -177,28 +177,30 @@ def rev_comp(seqlist: list):
     total_list = [seq.translate(table)[::-1] for seq in seqlist] + seqlist
     return total_list
 
-file_f= t.extract_info(r"PhoeVulATCC8482_R1.fq.gz")
+file_f= t.extract_info(r"Phoecicola_V_sim1.fq.gz")
 dict_fastq_f= parse_fastq(file_f)
-print (f"il file R1 contiene {len(dict_fastq_f)} sequenze")
-dict_filtered_f = dinamic_trimming(dict_fastq_f)
-dict_double_filtered_f = dict_filter(dict_filtered_f, 3)
-seq_filtered_f = [dict_double_filtered_f[key]["seq"] for key in dict_double_filtered_f.keys() if len(dict_double_filtered_f[key]["seq"]) > 75]
-print (f"dopo aver filtrato e trimmato sono rimaste {len(seq_filtered_f)} sequenze del file R1")
+# print (f"il file R1 contiene {len(dict_fastq_f)} sequenze")
+# dict_filtered_f = dinamic_trimming(dict_fastq_f)
+# dict_double_filtered_f = dict_filter(dict_filtered_f, 3)
+# seq_filtered_f = [dict_double_filtered_f[key]["seq"] for key in dict_double_filtered_f.keys() if len(dict_double_filtered_f[key]["seq"]) > 75]
+seq_f = [dict_fastq_f[key]["seq"] for key in dict_fastq_f.keys()]
+print (f"dopo aver filtrato e trimmato sono rimaste {len(seq_f)} sequenze del file R1")
 
-file_r= t.extract_info(r"PhoeVulATCC8482_R2.fq.gz")
+file_r= t.extract_info(r"Phoecicola_V_sim2.fq.gz")
 dict_fastq_r= parse_fastq(file_r)
-print (f"il file R2 contiene {len(dict_fastq_r)} sequenze")
-dict_filtered_r = dinamic_trimming(dict_fastq_r)
-dict_double_filtered_r = dict_filter(dict_filtered_r, 3)
-seq_filtered_r = [dict_double_filtered_r[key]["seq"] for key in dict_double_filtered_r.keys() if len(dict_double_filtered_r[key]["seq"]) > 75]
-print (f"dopo aver filtrato e trimmato sono rimaste {len(seq_filtered_r)} sequenze del file R2")
+# print (f"il file R2 contiene {len(dict_fastq_r)} sequenze")
+# dict_filtered_r = dinamic_trimming(dict_fastq_r)
+# dict_double_filtered_r = dict_filter(dict_filtered_r, 3)
+# seq_filtered_r = [dict_double_filtered_r[key]["seq"] for key in dict_double_filtered_r.keys() if len(dict_double_filtered_r[key]["seq"]) > 75]
+seq_r = [dict_fastq_r[key]["seq"] for key in dict_fastq_r.keys()]
+print (f"dopo aver filtrato e trimmato sono rimaste {len(seq_r)} sequenze del file R2")
 
-mucchio_selvaggio = seq_filtered_f + seq_filtered_r
+mucchio_selvaggio = seq_f + seq_r
 delirio_totale = rev_comp(mucchio_selvaggio)
 print(f"il grafo verrà costruito utilizzando {len(delirio_totale)} sequenze")
 
 #dict_kmer = t.calc_k_mer(29, delirio_totale)
 
-with gzip.open("kmer_diz_PhoeVul.pkl.gz", "wb") as f:
-    pickle.dump(t.calc_k_mer(29, delirio_totale), f)
+with gzip.open("kmer_17_NEW_PhoeVul.pkl.gz", "wb") as f:
+    pickle.dump(t.calc_k_mer(17, delirio_totale), f)
 
