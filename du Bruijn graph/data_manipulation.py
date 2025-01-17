@@ -197,5 +197,8 @@ mucchio_selvaggio = seq_filtered_f + seq_filtered_r
 delirio_totale = rev_comp(mucchio_selvaggio)
 print(f"il grafo verrà costruito utilizzando {len(delirio_totale)} sequenze")
 
-with gzip.open("list_seq_PhoeVul_filtered.pkl.gz", "wb") as f:
-    pickle.dump(delirio_totale, f)
+#dict_kmer = t.calc_k_mer(29, delirio_totale)
+
+with gzip.open("kmer_diz_PhoeVul.pkl.gz", "wb") as f:
+    pickle.dump(t.calc_k_mer(29, delirio_totale), f)
+
