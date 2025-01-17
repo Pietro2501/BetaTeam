@@ -6,6 +6,17 @@ class Node:
 
     def __init__(self, lab):
         self.label = lab
+        self.indegree= 0
+        self.outdegree = 0
+
+    def __eq__(self, other):
+        return self.label == other.label
+
+class Edge:
+    """ Classe associata all'edge, utile a definire in seguito il grafo di de Brujin"""
+
+    def __init__(self, km1mer_tuple):
+        self.label = km1mer_tuple[0] + km1mer_tuple[1][-1:]
         self.contatore = 0
 
     def __eq__(self, other):
@@ -13,15 +24,6 @@ class Node:
 
     def incrementa_contatore(self):
         self.contatore += 1
-
-class Edge:
-    """ Classe associata all'edge, utile a definire in seguito il grafo di de Brujin"""
-
-    def __init__(self, km1mer_tuple):
-        self.label = km1mer_tuple[0] + km1mer_tuple[1][-1:]
-
-    def __eq__(self, other):
-        return self.label == other.label
 
 with gzip.open('list_seq_PhoeVul_filtered.pkl.gz', 'rb') as f:
     reads = pickle.load(f)
