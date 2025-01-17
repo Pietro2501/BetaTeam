@@ -149,6 +149,7 @@ def extend_right(node_id, _dict_kmer_count, k, min_coverage=1):
 
         # Prende il successore con coverage più alto
         best_next_node, best_cov = successors[0]
+        del dict_kmer_count[current_node[0]+best_next_node] #FATTO ALLA FINE E DA VERIFICAREEEEEEEEEEEEEEEEEEE
 
         # Se la copertura è troppo bassa, interrompiamo
         if best_cov < min_coverage:
@@ -203,6 +204,7 @@ def extend_left(node_id, dict_kmer_count, k, min_coverage=1):
         predecessors.sort(key=lambda x: x[1], reverse=True)
 
         best_prev_node, best_cov = predecessors[0]
+        del dict_kmer_count[best_prev_node+current_node[-1]] #FATTO ALLA FINE E DA VERIFICAREEEEEEEEEEEEEEEEEEE
 
         if best_cov < min_coverage:
             break
