@@ -1,5 +1,8 @@
 import pickle
 import gzip
+import matplotlib.pyplot as plt
+import seaborn as sns
+from collections import Counter
 
 class Node:
     """ Classe associata al nodo, utile a definire in seguito il grafo di de Brujin"""
@@ -12,49 +15,72 @@ class Node:
     def __eq__(self, other):
         return self.label == other.label
 
-class Edge:
-    """ Classe associata all'edge, utile a definire in seguito il grafo di de Brujin"""
+    def incrementa_indegree(self):
+        self.indegree += 1
 
-    def __init__(self, km1mer_tuple):
-        self.label = km1mer_tuple[0] + km1mer_tuple[1][-1:]
-        self.contatore = 0
+    def incrementa_outdegree(self):
+        self.outdegree += 1
 
-    def __eq__(self, other):
-        return self.label == other.label
+# class Edge:
+#     """ Classe associata all'edge, utile a definire in seguito il grafo di de Brujin"""
+#
+#     def __init__(self, kmer, counter):
+#         self.label = kmer
+#         self.contatore = counter
+#
+#     def __eq__(self, other):
+#         return self.label == other.label
+#
+#     def incrementa_contatore(self):
+#         self.contatore += 1
 
-    def incrementa_contatore(self):
-        self.contatore += 1
+with gzip.open('kmer_diz_PhoeVul.pkl.gz', 'rb') as f:
+    dict_kmer_count = pickle.load(f)
 
-with gzip.open('list_seq_PhoeVul_filtered.pkl.gz', 'rb') as f:
-    reads = pickle.load(f)
+# print(len(reads), len(dict_kmer_count))
+# keys = list(dict_kmer_count.keys())[:20]
+# for key in keys:
+#     print(f" {key}: {dict_kmer_count[key]}")
 
-def construct_graph(reads, k):
+def get_nodes(_dict_kmer_count):
     """Costruisco il grafo di de Bruijn ottimizzando la ricerca con un dizionario"""
-    edges = {}
+    # edges = {}
     nodes = {}
 
-    for read in reads:
-        for i in range(len(read) - k + 1):
-            # Creazione e gestione degli archi
-            edge_label = read[i:i + k - 1] + read[i + 1:i + k][-1]
-            if edge_label not in edges:
-                edges[edge_label] = Edge((read[i:i + k - 1], read[i + 1:i + k]))
+    for key in _dict_kmer_count.keys():
+        prefix = key[:-1]
+        suffix = key[1:]
 
-            # Gestione dei nodi con dizionari
-            n1_label = read[i:i + k - 1]
-            n2_label = read[i + 1:i + k]
+        if prefix not in nodes:
+            nodes[prefix] = Node(prefix)
+            nodes[prefix].incrementa_outdegree()
+        else:
+            nodes[prefix].incrementa_outdegree()
 
-            if n1_label not in nodes:
-                nodes[n1_label] = Node(n1_label)
-            else:
-                nodes[n1_label].incrementa_contatore()
+        if suffix not in nodes:
+            nodes[suffix] = Node(suffix)
+            nodes[prefix].incrementa_indegree()
+        else:
+            nodes[prefix].incrementa_indegree()
+    return nodes
 
-            if n2_label not in nodes:
-                nodes[n2_label] = Node(n2_label)
-            else:
-                nodes[n2_label].incrementa_contatore()
+def distribuzione_kmer(_dict_kmer_count):
+    valori_numerici = list(_dict_kmer_count.values())
+    contatore = Counter(valori_numerici)
+    kmer_val = list(range(0, 16))  # Da 0 a 15
+    frequenze = [contatore.get(n, 0) for n in kmer_val]
+    plt.figure(figsize=(10, 6))
+    plt.bar(kmer_val, frequenze, color='skyblue', edgecolor='black')
+    plt.title('Distribuzione delle Numerosità', fontsize=16)
+    plt.xlabel('Numerosità', fontsize=14)
+    plt.ylabel('Frequenza', fontsize=14)
 
-    return edges, nodes
+    plt.xticks(kmer_val, fontsize=12)
+    plt.yticks(fontsize=12)
+    plt.show()
+
+distribuzione_kmer(dict_kmer_count)
+
 
 def output_contigs(g):
     """ Applica il percorso Euleriano per ricostruire la sequenza originaria """
