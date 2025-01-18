@@ -201,6 +201,6 @@ print(f"il grafo verrà costruito utilizzando {len(delirio_totale)} sequenze")
 
 #dict_kmer = t.calc_k_mer(29, delirio_totale)
 
-with gzip.open("kmer_17_NEW_PhoeVul.pkl.gz", "wb") as f:
+with gzip.open("kmer_17_NEW_PhoeVul_num1filtered.pkl.gz", "wb") as f:
     pickle.dump(t.calc_k_mer(17, delirio_totale), f)
 
