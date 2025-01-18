@@ -4,6 +4,9 @@ import os
 import math
 import sys
 
+from seaborn import lmplot
+
+
 def GC_skew (seq: str) -> float:
     feature={}
     lunghezze = len(seq)
@@ -93,7 +96,7 @@ def whiskers(prim: float, terz: float, IQR: float):
     higher = terz + 1.5*IQR
     return lower, higher
 
-def calc_k_mer(k,list_seq:list):
+def calc_k_mer(k,list_seq:list, min_num:int=2):
     """
     :param k:
     :param contenuto:
@@ -108,4 +111,8 @@ def calc_k_mer(k,list_seq:list):
                 kmer_diz[kmer] += 1
             else:
                 continue
+    list_key = list(kmer_diz.keys())
+    for key in list_key:
+        if kmer_diz[key] < min_num:
+            del kmer_diz[key]
     return kmer_diz
