@@ -2,6 +2,7 @@ import pickle
 import gzip
 import random
 import plotly.express as px
+import multiprocessing as mp
 from collections import Counter
 
 class Node:
@@ -15,11 +16,11 @@ class Node:
     def __eq__(self, other):
         return self.label == other.label
 
-    def incrementa_indegree(self):
-        self.indegree += 1
+    def incrementa_indegree(self, value=1):
+        self.indegree += value
 
-    def incrementa_outdegree(self):
-        self.outdegree += 1
+    def incrementa_outdegree(self, value=1):
+        self.outdegree += value
 
 # class Edge:
 #     """ Classe associata all'edge, utile a definire in seguito il grafo di de Brujin"""
@@ -34,35 +35,58 @@ class Node:
 #     def incrementa_contatore(self):
 #         self.contatore += 1
 
-with gzip.open('kmer_17_NEW_PhoeVul.pkl.gz', 'rb') as f:
+with gzip.open('kmer_17_NEW_PhoeVul_num1filtered.pkl.gz', 'rb') as f:
     dict_kmer_count = pickle.load(f)
 
-print(len(dict_kmer_count))
-# keys = list(dict_kmer_count.keys())[:20]
-# for key in keys:
-#     print(f" {key}: {dict_kmer_count[key]}")
-
-def get_nodes(_dict_kmer_count):
+def partial_nodes(_chunk):
     """Costruisco il grafo di de Bruijn ottimizzando la ricerca con un dizionario"""
     # edges = {}
-    nodes = {}
+    local_nodes = {}
 
-    for key in _dict_kmer_count.keys():
+    for key in _chunk:
         prefix = key[:-1]
         suffix = key[1:]
 
-        if prefix not in nodes:
-            nodes[prefix] = Node(prefix)
-            nodes[prefix].incrementa_outdegree()
+        if prefix not in local_nodes:
+            local_nodes[prefix] = Node(prefix)
+            local_nodes[prefix].incrementa_outdegree()
         else:
-            nodes[prefix].incrementa_outdegree()
+            local_nodes[prefix].incrementa_outdegree()
 
-        if suffix not in nodes:
-            nodes[suffix] = Node(suffix)
-            nodes[prefix].incrementa_indegree()
+        if suffix not in local_nodes:
+            local_nodes[suffix] = Node(suffix)
+            local_nodes[prefix].incrementa_indegree()
         else:
-            nodes[prefix].incrementa_indegree()
-    return nodes
+            local_nodes[prefix].incrementa_indegree()
+    return local_nodes
+
+def merge_nodes(results):
+    """Unisce i dizionari di nodi dai risultati dei processi."""
+    merged_nodes = {}
+    for partial_nodes in results:
+        for key, node in partial_nodes.items():
+            if key not in merged_nodes:
+                merged_nodes[key] = node
+            else:
+                merged_nodes[key].incrementa_indegree(node.indegree)
+                merged_nodes[key].incrementa_outdegree(node.outdegree)
+    return merged_nodes
+
+def get_nodes_parallel(_dict_kmer_count, num_processes=6):
+    """Costruisce il grafo di de Bruijn usando multiprocessing."""
+    # Divide il dizionario in chunks
+    keys = list(_dict_kmer_count.keys())
+    chunk_size = len(keys) // (num_processes+1)
+    chunks = [keys[i:i + chunk_size] for i in range(0, len(keys), chunk_size)]
+
+    # Crea un pool di processi
+    with mp.Pool(processes=num_processes) as pool:
+        # Applica la funzione su ciascun chunk
+        results = pool.map(partial_nodes, chunks)
+
+    # Unisci i risultati
+    _nodes = merge_nodes(results)
+    return _nodes
 
 def distribuzione_kmer(_dict_kmer_count):
     valori_numerici = list(_dict_kmer_count.values())
@@ -92,8 +116,6 @@ def distribuzione_kmer(_dict_kmer_count):
     #Mostrare il grafico
     fig.show()
 
-distribuzione_kmer(dict_kmer_count)
-
 
 ###############################################################################
 # 1. Scelta di un nodo "branching" in modo casuale
@@ -113,7 +135,7 @@ def pick_random_branching_node(_nodes):
 ###############################################################################
 # 2. Estensione a destra (extend_right)
 ###############################################################################
-def extend_right(node_id, _dict_kmer_count, k, min_coverage=1):
+def extend_right(node_id, _dict_kmer_count, min_coverage=1):
     """
     Estende il contig a destra partendo da un (k-1)-mer (node_id),
     scegliendo il k-mer con coverage più alto tra quelli che iniziano con node_id.
@@ -168,7 +190,7 @@ def extend_right(node_id, _dict_kmer_count, k, min_coverage=1):
 ###############################################################################
 # 3. Estensione a sinistra (extend_left)
 ###############################################################################
-def extend_left(node_id, dict_kmer_count, k, min_coverage=1):
+def extend_left(node_id, dict_kmer_count, min_coverage=1):
     """
     Estende il contig a sinistra partendo da un (k-1)-mer (node_id),
     scegliendo il k-mer con coverage più alto tra quelli che finiscono con node_id.
@@ -225,7 +247,7 @@ def extend_left(node_id, dict_kmer_count, k, min_coverage=1):
 ###############################################################################
 # 4. Costruzione del contig "locale" da un nodo scelto
 ###############################################################################
-def build_local_contig(dict_kmer_count, nodes, k, min_coverage=1):
+def build_local_contig(dict_kmer_count, nodes, _min_coverage=1):
     """
     1) Sceglie un nodo 'branching' a caso,
     2) Estende a sinistra e a destra,
@@ -246,10 +268,10 @@ def build_local_contig(dict_kmer_count, nodes, k, min_coverage=1):
         return ""
 
     # Estensione a sinistra
-    contig_left = extend_left(start_node, dict_kmer_count, k, min_coverage=min_coverage)
+    contig_left = extend_left(start_node, dict_kmer_count, min_coverage=_min_coverage)
 
     # Estensione a destra
-    contig_right = extend_right(start_node, dict_kmer_count, k, min_coverage=min_coverage)
+    contig_right = extend_right(start_node, dict_kmer_count, min_coverage=_min_coverage)
 
     # Il contig è: contig_left + start_node + contig_right
     #  - contig_left (nucleotidi aggiunti a sinistra)
@@ -258,3 +280,11 @@ def build_local_contig(dict_kmer_count, nodes, k, min_coverage=1):
     contig = contig_left + start_node + contig_right
 
     return contig
+
+if __name__ == '__main__':
+    print(f"Lavoreremo con {len(dict_kmer_count)} kmer")
+    distribuzione_kmer(dict_kmer_count)
+    nodes = get_nodes_parallel(dict_kmer_count)
+    print(f"Lavoreremo con {len(nodes)} nodi")
+    contig = build_local_contig(dict_kmer_count, nodes, _min_coverage=7)
+    print(f"Il miglior contig generato misura {len(contig)} basi")
