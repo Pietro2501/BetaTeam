@@ -194,6 +194,7 @@ def extend_right(node_id, adjacency_right, adjacency_left, dict_kmer_count,
 
         # Avanzo al nodo successivo
         current_node = best_next_node
+        # print(f"Sto percorrendo l'arco a destra e aggiungengo il nodo {current_node}")
 
     return "".join(contig_ext), _filtered_candidates
 
@@ -243,6 +244,9 @@ def extend_left(node_id, adjacency_right, adjacency_left, dict_kmer_count,
         contig_ext.append(best_prev_node[0])
 
         current_node = best_prev_node
+        # print(f"Sto percorrendo l'arco a destra e aggiungengo il nodo {current_node}")
+
+
 
     # Ricorda di invertire la lista contig_ext costruita al contrario
     contig_ext.reverse()
