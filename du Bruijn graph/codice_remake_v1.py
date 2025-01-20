@@ -126,11 +126,14 @@ def pick_random_branching_node(_nodes):
     nodes: dict { node_id (str) : Node(...) }
     Restituisce: la chiave (node_id) di un nodo valido, o None se non ce n'è.
     """
-    candidates = [n_id for n_id, obj in _nodes.items() if (obj.indegree + obj.outdegree) > 2]
-    if not candidates:
+    _candidates = [n_id for n_id, obj in _nodes.items() if (obj.indegree + obj.outdegree) > 2]
+    if not _candidates:
         return None
-    return random.choice(candidates)
+    return random.choice(_candidates)
 
+def count_hub(_nodes):
+    _candidates = [n_id for n_id, obj in _nodes.items() if (obj.indegree + obj.outdegree) > 2]
+    return len(_candidates)
 
 ###############################################################################
 # 2. Estensione a destra (extend_right)
@@ -286,5 +289,6 @@ if __name__ == '__main__':
     distribuzione_kmer(dict_kmer_count)
     nodes = get_nodes_parallel(dict_kmer_count)
     print(f"Lavoreremo con {len(nodes)} nodi")
-    contig = build_local_contig(dict_kmer_count, nodes, _min_coverage=7)
-    print(f"Il miglior contig generato misura {len(contig)} basi")
+    print(f"Gli hub nel grafo saranno {count_hub(nodes)}")
+    # contig = build_local_contig(dict_kmer_count, nodes, _min_coverage=7)
+    # print(f"Il miglior contig generato misura {len(contig)} basi")
