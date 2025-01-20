@@ -290,5 +290,5 @@ if __name__ == '__main__':
     nodes = get_nodes_parallel(dict_kmer_count)
     print(f"Lavoreremo con {len(nodes)} nodi")
     print(f"Gli hub nel grafo saranno {count_hub(nodes)}")
-    # contig = build_local_contig(dict_kmer_count, nodes, _min_coverage=7)
-    # print(f"Il miglior contig generato misura {len(contig)} basi")
+    contig = build_local_contig(dict_kmer_count, nodes, _min_coverage=7)
+    print(f"Il miglior contig generato misura {len(contig)} basi")
