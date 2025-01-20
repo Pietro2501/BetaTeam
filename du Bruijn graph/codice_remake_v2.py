@@ -311,9 +311,12 @@ if __name__ == '__main__':
     filtered_candidates = []
     counter = 1
     while len(filtered_candidates) != len(candidates):
-        contig, list_new_candidates = build_local_contig(dict_kmer_count, candidates, filtered_candidates, _min_coverage=7)
+        dict_kmer_count_temp = dict_kmer_count.copy()
+        print("Ho copiato il dizionario dei kmer...")
+        contig, list_new_candidates = build_local_contig(dict_kmer_count_temp, candidates, filtered_candidates, _min_coverage=7)
         filtered_candidates += list_new_candidates
         print(f"Il {counter}° contig generato misura {len(contig)} basi")
+        print(f"Gli hub per il prossimo grafo saranno {len(filtered_candidates)}")
         counter += 1
     end = time.time()
-    print(f"Il processo ha richiesto SOLO {(end - start)/60:.2f} minuti")
+    print(f"Il processo ha richiesto SOLO {(end - start)/3600:.2f} ore")
