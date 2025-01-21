@@ -346,7 +346,8 @@ if __name__ == '__main__':
     lenghts_contig=[]
 
     # Finché non abbiamo "filtrato" tutti gli hub
-    while len(filtered_candidates) < len(candidates):
+    # while len(filtered_candidates) < len(candidates):
+    while counter < 200:
         # Costruisce un contig a partire da un hub casuale
         contig, filtered_candidates = build_local_contig(
             dict_kmer_count,
