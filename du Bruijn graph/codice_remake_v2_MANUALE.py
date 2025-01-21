@@ -6,6 +6,9 @@ import multiprocessing as mp
 from collections import Counter, defaultdict
 import time
 
+from ipywidgets import interact
+
+
 ###############################################################################
 # CLASSI PER NODI, ECC.
 ###############################################################################
@@ -148,8 +151,7 @@ def build_adjacency_structures(dict_kmer_count):
 ###############################################################################
 # EXTEND_RIGHT
 ###############################################################################
-def extend_right(node_id, adjacency_right, adjacency_left, dict_kmer_count,
-                 _candidates, _filtered_candidates, min_coverage=1):
+def extend_right(node_id, adjacency_right, adjacency_left, dict_kmer_count,_candidates, _filtered_candidates, min_coverage=1):
     """
     Estende il contig verso destra partendo da node_id,
     scegliendo il successore con coverage più alto dagli adjacency.
@@ -181,9 +183,7 @@ def extend_right(node_id, adjacency_right, adjacency_left, dict_kmer_count,
         # 2) Rimuovo dalla lista adjacency_right[current_node]
         adjacency_right[current_node] = [(s, c) for (s, c) in successors if s != best_next_node]
         # 3) Rimuovo da adjacency_left[best_next_node] il current_node
-        adjacency_left[best_next_node] = [
-            (p, c) for (p, c) in adjacency_left[best_next_node] if p != current_node
-        ]
+        adjacency_left[best_next_node] = [(p, c) for (p, c) in adjacency_left[best_next_node] if p != current_node]
 
         # Se best_next_node è un hub e non è ancora filtrato, aggiungilo
         if best_next_node in _candidates and best_next_node not in _filtered_candidates:
@@ -201,8 +201,7 @@ def extend_right(node_id, adjacency_right, adjacency_left, dict_kmer_count,
 ###############################################################################
 # EXTEND_LEFT
 ###############################################################################
-def extend_left(node_id, adjacency_right, adjacency_left, dict_kmer_count,
-                _candidates, _filtered_candidates, min_coverage=1):
+def extend_left(node_id, adjacency_right, adjacency_left, dict_kmer_count,_candidates, _filtered_candidates, min_coverage=1):
     """
     Estende il contig a sinistra partendo da node_id,
     scegliendo il predecessore con coverage più alto dagli adjacency.
@@ -229,12 +228,8 @@ def extend_left(node_id, adjacency_right, adjacency_left, dict_kmer_count,
         if best_kmer in dict_kmer_count:
             del dict_kmer_count[best_kmer]
 
-        adjacency_left[current_node] = [
-            (p, c) for (p, c) in predecessors if p != best_prev_node
-        ]
-        adjacency_right[best_prev_node] = [
-            (s, c) for (s, c) in adjacency_right[best_prev_node] if s != current_node
-        ]
+        adjacency_left[current_node] = [(p, c) for (p, c) in predecessors if p != best_prev_node]
+        adjacency_right[best_prev_node] = [(s, c) for (s, c) in adjacency_right[best_prev_node] if s != current_node]
 
         # Se best_prev_node è un hub e non è ancora filtrato, aggiungilo
         if best_prev_node in _candidates and best_prev_node not in _filtered_candidates:
@@ -244,9 +239,6 @@ def extend_left(node_id, adjacency_right, adjacency_left, dict_kmer_count,
         contig_ext.append(best_prev_node[0])
 
         current_node = best_prev_node
-        # print(f"Sto percorrendo l'arco a destra e aggiungengo il nodo {current_node}")
-
-
 
     # Ricorda di invertire la lista contig_ext costruita al contrario
     contig_ext.reverse()
@@ -255,12 +247,7 @@ def extend_left(node_id, adjacency_right, adjacency_left, dict_kmer_count,
 ###############################################################################
 # COSTRUZIONE DI UN CONTIG A PARTIRE DA UN HUB
 ###############################################################################
-def build_local_contig(dict_kmer_count,
-                       adjacency_right,
-                       adjacency_left,
-                       _candidates,
-                       _filtered_candidates,
-                       min_coverage=1):
+def build_local_contig(dict_kmer_count,adjacency_right,adjacency_left,_candidates,_filtered_candidates,min_coverage=1):
     """
     1) Sceglie un nodo 'branching' a caso,
     2) Estende a sinistra e a destra,
@@ -272,26 +259,9 @@ def build_local_contig(dict_kmer_count,
         return "", _filtered_candidates
 
     # Estensione a sinistra
-    contig_left, filt_candidates_left = extend_left(
-        start_node,
-        adjacency_right,
-        adjacency_left,
-        dict_kmer_count,
-        _candidates,
-        _filtered_candidates,
-        min_coverage=min_coverage
-    )
-
+    contig_left, filt_candidates_left = extend_left(start_node,adjacency_right,adjacency_left,dict_kmer_count,_candidates,_filtered_candidates,min_coverage=min_coverage)
     # Estensione a destra (partendo dal medesimo start_node)
-    contig_right, new_filtered_candidates = extend_right(
-        start_node,
-        adjacency_right,
-        adjacency_left,
-        dict_kmer_count,
-        _candidates,
-        filt_candidates_left,
-        min_coverage=min_coverage
-    )
+    contig_right, new_filtered_candidates = extend_right(start_node,adjacency_right,adjacency_left,dict_kmer_count,_candidates,filt_candidates_left,min_coverage=min_coverage)
 
     # Contig completo
     contig = contig_left + start_node + contig_right
@@ -318,10 +288,74 @@ def calcola_n50(lunghezze_contig:list):
         print("Lista di contig vuota o dati non validi...")
 
 ###############################################################################
+# COSTRUZIONE DEI CONTIG SULLA BASE DELLE NECESSITA' DELL'UTENTE
+###############################################################################
+def iterative_contig_generation(_dict_kmer_count, _adjacency_right, _adjacency_left, _candidates, _start, _min_coverage=7):
+    filtered_candidates = []
+    counter = 1
+    lenghts_contig = []
+
+    # Chiede all'utente il tipo di iterazione
+    while True:
+        try:
+            iter_choice = input("\nQuanto profonda vuoi sia la lettura del grafo?\n\t- '1' per ricoprire tutti i nodi hub del grafo"
+                                " (operazione computazionalmente onerosa)\n\t- '2' per un numero di contig da te desiderato\n")
+            if iter_choice not in ['1', '2']:
+                raise ValueError
+            break
+        except ValueError:
+            print("Attenzione a cosa digiti... Inserisci '1' o '2' per scegliere il tipo di iterazione.")
+
+    # Se l'utente sceglie iterazione definita, chiede il numero massimo di iterazioni
+    max_iterations = None
+    if iter_choice == '2':
+        while True:
+            try:
+                max_iterations = int(input("Inserisci il numero massimo di iterazioni (intero positivo):\n"))
+                if max_iterations <= 0:
+                    raise ValueError
+                break
+            except ValueError:
+                print("Devi inserire un valore intero positivo, non caratteri a casaccio!!!")
+
+    # Esegui il loop in base alla scelta dell'utente
+    if iter_choice == '1':
+        # Iterazione basata sulla condizione while
+        while len(filtered_candidates) < len(_candidates):
+            contig, filtered_candidates = build_local_contig(_dict_kmer_count,_adjacency_right,_adjacency_left,_candidates,filtered_candidates,_min_coverage)
+            print(f"Il {counter}° contig generato misura {len(contig)} basi")
+            print(f"Hub filtrati finora: {len(filtered_candidates)} / {len(_candidates)}")
+            lenghts_contig.append(len(contig))
+            counter += 1
+    else:
+        # Iterazione fissa
+        while counter <= max_iterations:
+            contig, filtered_candidates = build_local_contig(_dict_kmer_count,_adjacency_right,_adjacency_left,_candidates,filtered_candidates,_min_coverage)
+            print(f"Il {counter}° contig generato misura {len(contig)} basi")
+            print(f"Hub filtrati finora: {len(filtered_candidates)} / {len(_candidates)}")
+            lenghts_contig.append(len(contig))
+            counter += 1
+
+    print(f"L'N50 ottenuto dai contig generati è pari a {calcola_n50(lenghts_contig)}")
+    end = time.time()
+    print(f"Il processo ha richiesto {(end - _start) / 3600:.2f} ore")
+
+def intestazione_progetto():
+    print("\n{:^80}\n".format("Progetto: Grafo di de Bruijn"))
+    print("Partendo da read paired end di 150pb, ottenute da un sequenziamento Illumina")
+    print("condotto su genoma di Phocaeicola vulgatus, proveremo a realizzare dei contig.")
+    print("Al termine di questa operazione restituiremo il valore N50 calcolato per")
+    print("verificare la bont\u00e0 nella ricostruzione della sequenza.\n")
+    print("I dati iniziali sono stati trattati con lo scopo di ottenere dei k-mer di")
+    print("lunghezza pari a 17nt, calcolarne la rappresentativit\u00e0 nelle read e infine")
+    print("costruire dei nodi prefix e suffix con cui percorrere il grafo.\n")
+
+###############################################################################
 # MAIN
 ###############################################################################
 if __name__ == '__main__':
     start = time.time()
+    intestazione_progetto()
 
     # Caricamento del dizionario {kmer -> coverage}
     with gzip.open('kmer_17_NEW_PhoeVul_num1filtered.pkl.gz', 'rb') as f:
@@ -341,27 +375,6 @@ if __name__ == '__main__':
     candidates = count_hub(nodes)
     print(f"Gli hub nel grafo saranno {len(candidates)}")
 
-    filtered_candidates = []
-    counter = 1
-    lenghts_contig=[]
+    # Produco contig ed estrapolo l'N50 sulla base dei limiti che mi inpone l'utente
+    iterative_contig_generation(dict_kmer_count, adjacency_right, adjacency_left, candidates, start)
 
-    # Finché non abbiamo "filtrato" tutti gli hub
-    # while len(filtered_candidates) < len(candidates):
-    while counter < 200:
-        # Costruisce un contig a partire da un hub casuale
-        contig, filtered_candidates = build_local_contig(
-            dict_kmer_count,
-            adjacency_right,
-            adjacency_left,
-            candidates,
-            filtered_candidates,
-            min_coverage=7
-        )
-        print(f"Il {counter}° contig generato misura {len(contig)} basi")
-        print(f"Hub filtrati finora: {len(filtered_candidates)} / {len(candidates)}")
-        lenghts_contig.append(len(contig))
-        counter += 1
-
-    print(f"L'N50 ottenuto dai contig generati è pari a {calcola_n50(lenghts_contig)}")
-    end = time.time()
-    print(f"Il processo ha richiesto {(end - start) / 3600:.2f} ore")
