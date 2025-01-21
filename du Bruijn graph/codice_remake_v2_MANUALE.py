@@ -298,6 +298,26 @@ def build_local_contig(dict_kmer_count,
     return contig, new_filtered_candidates
 
 ###############################################################################
+# CALCOLO DELL'N50 SULLA BASE DELLE LUNGHEZZE DEI CONTIG PRODOTTI
+###############################################################################
+def calcola_n50(lunghezze_contig:list):
+    try:
+        # Ordina le lunghezze dei contig in ordine decrescente
+        lunghezze_contig.sort(reverse=True)
+
+        # Calcola la lunghezza totale dei contig
+        lunghezza_totale = sum(lunghezze_contig)
+
+        # Somma le lunghezze dei contig finché non si raggiunge almeno il 50% della lunghezza totale
+        somma_parziale = 0
+        for contig in lunghezze_contig:
+            somma_parziale += contig
+            if somma_parziale >= lunghezza_totale / 2:
+                return contig  # Restituisce la lunghezza del contig che raggiunge o supera il 50%
+    except IndexError:
+        print("Lista di contig vuota o dati non validi...")
+
+###############################################################################
 # MAIN
 ###############################################################################
 if __name__ == '__main__':
@@ -323,6 +343,7 @@ if __name__ == '__main__':
 
     filtered_candidates = []
     counter = 1
+    lenghts_contig=[]
 
     # Finché non abbiamo "filtrato" tutti gli hub
     while len(filtered_candidates) < len(candidates):
@@ -337,7 +358,9 @@ if __name__ == '__main__':
         )
         print(f"Il {counter}° contig generato misura {len(contig)} basi")
         print(f"Hub filtrati finora: {len(filtered_candidates)} / {len(candidates)}")
+        lenghts_contig.append(len(contig))
         counter += 1
 
+    print(f"L'N50 ottenuto dai contig generati è pari a {calcola_n50(lenghts_contig)}")
     end = time.time()
     print(f"Il processo ha richiesto {(end - start) / 3600:.2f} ore")
