@@ -13,7 +13,7 @@ from ipywidgets import interact
 # CLASSI PER NODI, ECC.
 ###############################################################################
 class Node:
-    """Classe associata al nodo, utile a definire in seguito il grafo di de Brujin"""
+
 
     def __init__(self, lab):
         self.label = lab
@@ -33,7 +33,7 @@ class Node:
 # FUNZIONI PER IL GRAFO (COSTRUZIONE NODI IN PARALLELO)
 ###############################################################################
 def partial_nodes(_chunk):
-    """Costruisce nodi di de Bruijn (senza edges, qui si accumulano solo indegree/outdegree)."""
+
     local_nodes = {}
     for key in _chunk:
         prefix = key[:-1]
@@ -50,7 +50,7 @@ def partial_nodes(_chunk):
     return local_nodes
 
 def merge_nodes(results):
-    """Unisce i dizionari di nodi dai risultati dei processi."""
+
     merged_nodes = {}
     for partial_n in results:
         for key, node in partial_n.items():
@@ -62,7 +62,7 @@ def merge_nodes(results):
     return merged_nodes
 
 def get_nodes_parallel(_dict_kmer_count, num_processes=6):
-    """Costruisce i nodi di de Bruijn usando multiprocessing."""
+
     # Divide il dizionario in chunks
     keys = list(_dict_kmer_count.keys())
     chunk_size = len(keys) // (num_processes + 1) if (num_processes + 1) > 0 else len(keys)
@@ -81,7 +81,7 @@ def get_nodes_parallel(_dict_kmer_count, num_processes=6):
 # DISTRIBUZIONE K-MER (GRAFICO)
 ###############################################################################
 def distribuzione_kmer(_dict_kmer_count):
-    """Grafico di distribuzione della numerosità dei k-mer."""
+
     valori_numerici = list(_dict_kmer_count.values())
     contatore = Counter(valori_numerici)
     max_numerosita = max(valori_numerici)
@@ -109,7 +109,7 @@ def distribuzione_kmer(_dict_kmer_count):
 # CONTA HUB
 ###############################################################################
 def count_hub(_nodes):
-    """Ritorna la lista dei nodi con (indegree + outdegree) > 2."""
+
     _candidates = [n_id for n_id, obj in _nodes.items() if (obj.indegree + obj.outdegree) > 2]
     return _candidates
 
@@ -117,7 +117,7 @@ def count_hub(_nodes):
 # PICK RANDOM HUB
 ###############################################################################
 def pick_random_branching_node(_candidates, _filtered_candidates=None):
-    """Seleziona un nodo a caso tra i 'branching', escludendo quelli già filtrati."""
+
     if not _candidates:
         return None
     if _filtered_candidates is None:
@@ -131,12 +131,7 @@ def pick_random_branching_node(_candidates, _filtered_candidates=None):
 # STRUTTURE DI ADIACENZA (PER EVITARE SCANSIONI TOTALI)
 ###############################################################################
 def build_adjacency_structures(dict_kmer_count):
-    """
-    Costruisce due strutture di adiacenza:
-      - adjacency_right[prefix] = lista di (suffix, coverage)
-      - adjacency_left[suffix]  = lista di (prefix, coverage)
-    così da evitare di scansionare tutto il dict ad ogni passo.
-    """
+
     adjacency_right = defaultdict(list)
     adjacency_left = defaultdict(list)
 
@@ -152,10 +147,7 @@ def build_adjacency_structures(dict_kmer_count):
 # EXTEND_RIGHT
 ###############################################################################
 def extend_right(node_id, adjacency_right, adjacency_left,_candidates, _filtered_candidates, min_coverage=1):
-    """
-    Estende il contig verso destra partendo da node_id,
-    scegliendo il successore con coverage più alto dagli adjacency.
-    """
+
     contig_ext = []
     current_node = node_id
 
@@ -195,10 +187,7 @@ def extend_right(node_id, adjacency_right, adjacency_left,_candidates, _filtered
 # EXTEND_LEFT
 ###############################################################################
 def extend_left(node_id, adjacency_right, adjacency_left,_candidates, _filtered_candidates, min_coverage=1):
-    """
-    Estende il contig a sinistra partendo da node_id,
-    scegliendo il predecessore con coverage più alto dagli adjacency.
-    """
+
     contig_ext = []
     current_node = node_id
 
@@ -234,11 +223,7 @@ def extend_left(node_id, adjacency_right, adjacency_left,_candidates, _filtered_
 # COSTRUZIONE DI UN CONTIG A PARTIRE DA UN HUB
 ###############################################################################
 def build_local_contig(adjacency_right,adjacency_left,_candidates,_filtered_candidates,min_coverage=1):
-    """
-    1) Sceglie un nodo 'branching' a caso,
-    2) Estende a sinistra e a destra,
-    3) Restituisce l'intero contig (stringa nucleotidica) e la lista aggiornata.
-    """
+
     start_node = pick_random_branching_node(_candidates, _filtered_candidates)
     if not start_node:
         # Nessun nodo con (in+out) > 2 => potremmo restituire stringa vuota
