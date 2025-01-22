@@ -500,7 +500,7 @@ def kmer_filter_coverage():
     """
     while True:
         try:
-            min_coverage_choice = int(input("Inserisci il valore minimo di coverage che vorresti abbiano i kmer del grafo per la costruzione dei contig:\n"))
+            min_coverage_choice = int(input("\nInserisci il valore minimo di coverage che vorresti abbiano i kmer del grafo per la costruzione dei contig:\n"))
             if min_coverage_choice <= 0:
                 raise ValueError("Inserisci un valore intero positivo")
             break
