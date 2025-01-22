@@ -282,7 +282,7 @@ def iterative_contig_generation(_candidates, _start, _min_coverage=7):
     if iter_choice == '2':
         while True:
             try:
-                max_iterations = int(input("Inserisci il numero massimo di iterazioni (intero positivo):\n"))
+                max_iterations = int(input("Inserisci il numero massimo di contig (intero positivo):\n"))
                 if max_iterations <= 0:
                     raise ValueError
                 break
@@ -313,7 +313,7 @@ def iterative_contig_generation(_candidates, _start, _min_coverage=7):
 
     print(f"L'N50 ottenuto dai contig generati è pari a {calcola_n50(lenghts_contig)}")
     end = time.time()
-    print(f"Il processo ha richiesto {(end - _start) / 3600:.2f} ore")
+    print(f"Il processo ha richiesto {int((end - _start) // 3600)} ore e {int(((end - _start)/3600 - (end - _start)//3600)*60)} minuti")
 
 def intestazione_progetto():
     print("\n{:^80}\n".format("Progetto: Grafo di de Bruijn"))
