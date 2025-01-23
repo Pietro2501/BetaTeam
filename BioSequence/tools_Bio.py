@@ -98,9 +98,22 @@ def whiskers(prim: float, terz: float, IQR: float):
 
 def calc_k_mer(k,list_seq:list, min_num:int=2):
     """
-    :param k:
-    :param contenuto:
-    :return:
+    Calculate k-mers from a list of sequences.
+
+    This function extracts k-mers from each sequence in the input list and counts their occurrences.
+    It skips sub-sequences containing the character "N". Additionally, k-mers with occurrences lower
+    than `min_num` are removed from the resulting dictionary.
+
+    :param k: Length of each k-mer to be extracted from sequences.
+    :type k: int
+    :param list_seq: List of sequences from which k-mers will be generated.
+    :type list_seq: list
+    :param min_num: Minimum number of occurrences required to retain a k-mer in the
+        result dictionary. Defaults to 2.
+    :type min_num: int
+    :return: A dictionary where keys are the k-mers and values are their respective
+        occurrence counts.
+    :rtype: dict
     """
     kmer_diz = {}
     for seq in list_seq:
