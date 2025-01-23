@@ -5,10 +5,7 @@ import gzip
 def parse_fastq(file_obj: str, offset=33) -> dict:
     """
     Parses a FASTQ file and returns a dictionary representation of the sequences,
-    quality scores and ASCII quality scores. The function processes the input file
-    line by line, ensuring the structural integrity for each FASTQ record, including
-    checking coherence of headers and applicable offset values for quality score
-    conversion.
+    quality scores and ASCII quality scores.
 
     :param file_obj: A file object containing the FASTQ data to be parsed.
     :type file_obj: str
@@ -17,8 +14,7 @@ def parse_fastq(file_obj: str, offset=33) -> dict:
     :type offset: int
     :return: A dictionary where the keys are sequence identifiers (headers starting
              with '@') and values are sub-dictionaries containing sequence strings,
-             ASCII quality scores, and numeric quality scores. Returns None if the file
-             is found to be corrupted or improperly formatted.
+             ASCII quality scores, and numeric quality scores.
     :rtype: dict or None
     """
     with open(file_obj, "r") as file_obj:
@@ -32,10 +28,6 @@ def parse_fastq(file_obj: str, offset=33) -> dict:
             """
             Validates the coherence of a FASTQ record by checking the format of
             the accession line and the "+" line.
-
-            The function ensures that the accession line starts with "@" and
-            the "+" line starts with "+", which is required for the correct
-            format of a FASTQ record.
 
             :param acc: The accession line from the FASTQ record.
             :type acc: str
@@ -81,9 +73,7 @@ def exp_err(qual, is_ascii=False):
 
     This function computes the expected error based on provided quality scores.
     The quality scores can either be in ASCII-encoded form (default) or as raw
-    numerical values. The quality scores are converted to probabilities using
-    Q = -10 * log10(P), where P is the probability of error corresponding to a
-    given quality score.
+    numerical values.
 
     :param qual: The quality scores. If `is_ascii` is True, they are
         expected to be ASCII-encoded characters. Otherwise, they should
@@ -118,8 +108,7 @@ def dinamic_trimming(dict_fastq: dict, threshold=25, window=15):
         considered too low. Default is 25.
     :param window: Integer size of the sliding window used to compute the average
         quality score. Default is 15.
-    :return: The updated dictionary after processing, where reads not meeting
-        quality criteria are trimmed.
+    :return: The updated dictionary after processing.
     :rtype: dict
     """
     for key in dict_fastq.keys():
@@ -138,9 +127,6 @@ def dinamic_trimming(dict_fastq: dict, threshold=25, window=15):
 
 def dict_filter(_dict_fastq: dict, k: int):
     """
-    Filters a given dictionary containing FASTQ data by removing entries with sequenced
-    reads that exceed a specified error threshold.
-
     The function iterates through the dictionary, calculates an expected error value
     for each entry's quality scores, and deletes entries where the error value
     exceeds the given threshold.
@@ -177,30 +163,30 @@ def rev_comp(seqlist: list):
     total_list = [seq.translate(table)[::-1] for seq in seqlist] + seqlist
     return total_list
 
-file_f= t.extract_info(r"Phoecicola_V_sim1.fq.gz")
-dict_fastq_f= parse_fastq(file_f)
-# print (f"il file R1 contiene {len(dict_fastq_f)} sequenze")
-# dict_filtered_f = dinamic_trimming(dict_fastq_f)
-# dict_double_filtered_f = dict_filter(dict_filtered_f, 3)
-# seq_filtered_f = [dict_double_filtered_f[key]["seq"] for key in dict_double_filtered_f.keys() if len(dict_double_filtered_f[key]["seq"]) > 75]
-seq_f = [dict_fastq_f[key]["seq"] for key in dict_fastq_f.keys()]
-print (f"dopo aver filtrato e trimmato sono rimaste {len(seq_f)} sequenze del file R1")
+if __name__ == "__main__":
+    file_f= t.extract_info(r"Phoecicola_V_sim1.fq.gz")
+    dict_fastq_f= parse_fastq(file_f)
+    # print (f"il file R1 contiene {len(dict_fastq_f)} sequenze")
+    # dict_filtered_f = dinamic_trimming(dict_fastq_f)
+    # dict_double_filtered_f = dict_filter(dict_filtered_f, 3)
+    # seq_filtered_f = [dict_double_filtered_f[key]["seq"] for key in dict_double_filtered_f.keys() if len(dict_double_filtered_f[key]["seq"]) > 75]
+    seq_f = [dict_fastq_f[key]["seq"] for key in dict_fastq_f.keys()]
+    print (f"andremo a lavorare con {len(seq_f)} sequenze del file R1")
 
-file_r= t.extract_info(r"Phoecicola_V_sim2.fq.gz")
-dict_fastq_r= parse_fastq(file_r)
-# print (f"il file R2 contiene {len(dict_fastq_r)} sequenze")
-# dict_filtered_r = dinamic_trimming(dict_fastq_r)
-# dict_double_filtered_r = dict_filter(dict_filtered_r, 3)
-# seq_filtered_r = [dict_double_filtered_r[key]["seq"] for key in dict_double_filtered_r.keys() if len(dict_double_filtered_r[key]["seq"]) > 75]
-seq_r = [dict_fastq_r[key]["seq"] for key in dict_fastq_r.keys()]
-print (f"dopo aver filtrato e trimmato sono rimaste {len(seq_r)} sequenze del file R2")
+    file_r= t.extract_info(r"Phoecicola_V_sim2.fq.gz")
+    dict_fastq_r= parse_fastq(file_r)
+    # print (f"il file R2 contiene {len(dict_fastq_r)} sequenze")
+    # dict_filtered_r = dinamic_trimming(dict_fastq_r)
+    # dict_double_filtered_r = dict_filter(dict_filtered_r, 3)
+    # seq_filtered_r = [dict_double_filtered_r[key]["seq"] for key in dict_double_filtered_r.keys() if len(dict_double_filtered_r[key]["seq"]) > 75]
+    seq_r = [dict_fastq_r[key]["seq"] for key in dict_fastq_r.keys()]
+    print (f"andremo a lavorare con {len(seq_r)} sequenze del file R2")
 
-mucchio_selvaggio = seq_f + seq_r
-delirio_totale = rev_comp(mucchio_selvaggio)
-print(f"il grafo verrà costruito utilizzando {len(delirio_totale)} sequenze")
+    mucchio_selvaggio = seq_f + seq_r
+    delirio_totale = rev_comp(mucchio_selvaggio)
+    print(f"il grafo verrà costruito utilizzando {len(delirio_totale)} sequenze")
 
-#dict_kmer = t.calc_k_mer(29, delirio_totale)
 
-with gzip.open("kmer_17_NEW_PhoeVul_num1filtered.pkl.gz", "wb") as f:
-    pickle.dump(t.calc_k_mer(17, delirio_totale), f)
+    with gzip.open("kmer_17_NEW_PhoeVul_num1filtered.pkl.gz", "wb") as f:
+        pickle.dump(t.calc_k_mer(17, delirio_totale), f)
 
