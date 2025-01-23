@@ -7,9 +7,6 @@ from collections import Counter, defaultdict
 import time
 
 
-###############################################################################
-# CLASSI PER NODI, ECC.
-###############################################################################
 class Node:
     """
     Represents a node in a de Brujin graph.
@@ -39,9 +36,10 @@ class Node:
     def incrementa_outdegree(self, value=1):
         self.outdegree += value
 
-###############################################################################
-# FUNZIONI PER IL GRAFO (COSTRUZIONE NODI IN PARALLELO)
-###############################################################################
+
+    # CREAZIONE DEI NODI E PROCESSAMENTO PARALLELIZZATO #
+
+
 def partial_nodes(_chunk):
     """
     Generate a dictionary of local nodes with their in-degrees and out-degrees
@@ -130,9 +128,10 @@ def get_nodes_parallel(_dict_kmer_count, num_processes=6):
     _nodes = merge_nodes(results)
     return _nodes
 
-###############################################################################
-# DISTRIBUZIONE K-MER (GRAFICO)
-###############################################################################
+
+    # GRAFICO DI DISTRIBUZIONE K-MER  #
+
+
 def distribuzione_kmer(_dict_kmer_count):
     """
     Generates a histogram displaying the distribution of k-mer multiplicities from the given
@@ -155,9 +154,10 @@ def distribuzione_kmer(_dict_kmer_count):
     fig.update_traces(texttemplate='%{text}', textposition='outside') # serve per stampare il valore già associato tramite "text=frequenze" nel metodo "px.bar"
     fig.show()
 
-###############################################################################
-# CONTA HUB
-###############################################################################
+
+    # SELEZIONE NODI HUB #
+
+
 def hub_finding(_nodes):
     """
     Identifies and returns a list of hub nodes from the given node dictionary.
@@ -172,9 +172,10 @@ def hub_finding(_nodes):
     _candidates = [n_id for n_id, obj in _nodes.items() if (obj.indegree + obj.outdegree) > 2]
     return _candidates
 
-###############################################################################
-# PICK RANDOM HUB
-###############################################################################
+
+    # SCELTA DI NODO HUB RANDOM #
+
+
 def pick_random_branching_node(_candidates, _filtered_candidates=None):
     """
     Selects a random branching node from the provided candidates, excluding
@@ -199,9 +200,10 @@ def pick_random_branching_node(_candidates, _filtered_candidates=None):
         return None
     return random.choice(current_candidates)
 
-###############################################################################
-# STRUTTURE DI ADIACENZA (PER EVITARE SCANSIONI TOTALI)
-###############################################################################
+
+    # CREAZIONE DI STRUTTURE DI PROSSIMITA' PER EVITARE SCANSIONI TOTALI #
+
+
 def get_proximity_dict(dict_kmer_count):
     """
     Computes proximity dictionaries for k-mers based on their prefixes and suffixes.
@@ -230,9 +232,10 @@ def get_proximity_dict(dict_kmer_count):
 
     return dict_prox_right, dict_prox_left
 
-###############################################################################
-# EXTEND_RIGHT
-###############################################################################
+
+    # FUNZIONE DI ESTENSIONE DEL CONTIG A DESTRA #
+
+
 def extend_right(node_id, dict_prox_right, dict_prox_left,_candidates, _filtered_candidates, min_coverage):
     """
     Extends a contig starting from a given node by iteratively appending the most suitable
@@ -291,9 +294,9 @@ def extend_right(node_id, dict_prox_right, dict_prox_left,_candidates, _filtered
 
     return "".join(contig_ext), _filtered_candidates
 
-###############################################################################
-# EXTEND_LEFT
-###############################################################################
+
+    # FUNZIONE DI ESTENSIONE DEL CONTIG A SINISTRA #
+
 def extend_left(node_id, dict_prox_right, dict_prox_left,_candidates, _filtered_candidates, min_coverage):
     """
     Extends a contig sequence to the left based on a directed graph structure. The function
@@ -345,9 +348,9 @@ def extend_left(node_id, dict_prox_right, dict_prox_left,_candidates, _filtered_
     contig_ext.reverse()
     return "".join(contig_ext), _filtered_candidates
 
-###############################################################################
-# COSTRUZIONE DI UN CONTIG A PARTIRE DA UN HUB
-###############################################################################
+
+    # COSTRUZIONE DI UN CONTIG A PARTIRE DA UN NODO HUB #
+
 def build_local_contig(dict_prox_right,dict_prox_left,_candidates,_filtered_candidates,min_coverage):
     """
     Constructs a local contig by selecting a starting branching node and extending it in both left
@@ -380,9 +383,9 @@ def build_local_contig(dict_prox_right,dict_prox_left,_candidates,_filtered_cand
     contig = contig_left + start_node + contig_right
     return contig, new_filtered_candidates
 
-###############################################################################
-# CALCOLO DELL'N50 SULLA BASE DELLE LUNGHEZZE DEI CONTIG PRODOTTI
-###############################################################################
+
+    # CALCOLO DELL'N50 SULLA BASE DELLE LUNGHEZZE DEI CONTIG PRODOTTI #
+
 def calcola_n50(lunghezze_contig:list):
     """
     Calculates the N50 value of a list of contig lengths. The N50 is a statistical
@@ -408,9 +411,10 @@ def calcola_n50(lunghezze_contig:list):
     except IndexError:
         print("Lista di contig vuota o dati non validi...")
 
-###############################################################################
-# COSTRUZIONE DEI CONTIG SULLA BASE DELLE NECESSITA' DELL'UTENTE
-###############################################################################
+
+    # COSTRUZIONE DEI CONTIG SULLA BASE DELLE NECESSITA' DELL'UTENTE #
+
+
 def iterative_contig_generation(dict_kmer_count, _candidates, _start, _min_coverage=7):
     """
     This function performs an iterative generation of contigs from a dictionary of k-mer counts. The user has 2 options:
@@ -508,9 +512,11 @@ def kmer_filter_coverage():
             print("Attenzione a cosa digiti... Inserisci un valore intero")
     return min_coverage_choice
 
-###############################################################################
-# MAIN
-###############################################################################
+
+
+    #MAIN#
+
+
 def main():
     start = time.time()
     intestazione_progetto()
