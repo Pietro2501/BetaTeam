@@ -121,7 +121,7 @@ def get_nodes_parallel(_dict_kmer_count, num_processes=6):
 
     # creo un pool di processi
     with mp.Pool(processes=num_processes) as pool:
-        # Applica la funzione su ciascun chunk
+        # applica la funzione su ciascun chunk
         results = pool.map(partial_nodes, chunks)
 
     # unisco i risultati
