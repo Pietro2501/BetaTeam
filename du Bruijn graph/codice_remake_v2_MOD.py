@@ -2,7 +2,7 @@ import pickle
 import gzip
 import random
 import plotly.express as px
-import multiprocessing as mp
+from multiprocessing import Pool
 from collections import Counter, defaultdict
 import time
 
@@ -120,7 +120,7 @@ def get_nodes_parallel(_dict_kmer_count, num_processes=6):
     chunks = [keys[i:i + chunk_size] for i in range(0, len(keys), chunk_size)]
 
     # creo un pool di processi
-    with mp.Pool(processes=num_processes) as pool:
+    with Pool(processes=num_processes) as pool:
         # applica la funzione su ciascun chunk
         results = pool.map(partial_nodes, chunks)
 
