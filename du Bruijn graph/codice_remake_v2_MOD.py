@@ -480,7 +480,7 @@ def iterative_contig_generation(dict_kmer_count, _candidates, _start, _min_cover
             lenghts_contig.append(len(contig))
             counter += 1
 
-    print(f"L'N50 ottenuto dai contig generati è pari a {calcola_n50(lenghts_contig)}")
+    print(f"\nL'N50 ottenuto dai contig generati è pari a {calcola_n50(lenghts_contig)}")
     end = time.time()
     print(f"Il processo ha richiesto {int((end - _start) // 3600)} ore e {int(((end - _start)/3600 - (end - _start)//3600)*60)} minuti")
 
