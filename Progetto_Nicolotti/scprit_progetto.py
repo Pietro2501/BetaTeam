@@ -88,11 +88,8 @@ for seed in seeds:
         # score che rappresentano la confidenza del modello nel classificare come "1"
         preds['SVR'][val_idx] = svr.predict(X_val) # associo anche qui i valori ai corrispondenti indici in preds[SVR]
 
-<<<<<<< Updated upstream
     # 4.3 raccolgo metriche CV (validation folds)
-=======
     # raccogli metriche CV (validation folds)
->>>>>>> Stashed changes
     for model in ['RF','SVR']:
         scr = preds[model] # isolo gli score (scr) di predizione in validation per ogni modello
         bin_pred = (scr >= 0.5).astype(int) # creo lista binaria di 0/1, leggendo scr, usando la soglia di riferimento
