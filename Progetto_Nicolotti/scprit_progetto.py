@@ -5,27 +5,22 @@ from rdkit import Chem, RDLogger
 from rdkit.Chem import rdFingerprintGenerator
 from sklearn.ensemble import RandomForestClassifier
 from sklearn.feature_selection import VarianceThreshold
-from sklearn.metrics import (
-    accuracy_score, recall_score, confusion_matrix,
-    matthews_corrcoef, roc_auc_score, roc_curve
-)
+from sklearn.metrics import (accuracy_score, recall_score, confusion_matrix,matthews_corrcoef, roc_auc_score, roc_curve)
 from sklearn.model_selection import train_test_split, StratifiedKFold
 from sklearn.preprocessing import Normalizer
 from sklearn.svm import SVR
 
-# --- 0. Disabilito i log di RDKit (warning) ---
+# --- Disabilito i log di RDKit (warning) ---
 RDLogger.DisableLog('rdApp.*')
 
-# --- 1. Caricamento e preparazione dati ---
+# --- Caricamento e preparazione dati ---
 df = pd.read_excel('jm101421d_si_001.xls', sheet_name='Dataset', engine='xlrd')
 df.columns = df.columns.str.strip() # rimuovo spazi bianchi alle estremità dei nomi delle colonne
-if 'Name' in df.columns:
-    df = df.drop(columns=['Name']) # rimuovo la colonna "name" (inutile)
 
 smiles = df['SMILES'].astype(str).tolist() # estraggo colonna degli smiles
 y_all = df['Activity'].values # estraggo colonna dei label "attività" (0/1)
 
-# --- 2. Generazione Morgan fingerprint (con rdFingerprintGenerator) ---
+# --- Generazione Morgan fingerprint (con rdFingerprintGenerator) ---
 
 # Generatore Morgan fingerprint (riutilizzabile)
 morgan_generator = rdFingerprintGenerator.GetMorganGenerator(fpSize=512,includeChirality=True) # oggetto generatore fp
@@ -54,12 +49,12 @@ print(f"Ho mantenuto poi {len(valid)} fingerprint array validi")
 fps = np.array([fps_list[i] for i in valid]) # genero una nuova lista degli array validi
 y_all = y_all[valid] # recupero anche gli elementi dalla colonna delle attività corrispondenti agli indici
 
-# --- 3. Preprocessing ---
+# --- Preprocessing ---
 fps = fps[:, fps.sum(axis=0) > 0] # rimuovo molecole con bit sempre zero
 fps = VarianceThreshold(0.02).fit_transform(fps) # rimuovo molecole con varianza ridotta (<0.02)
 X_all = Normalizer().fit_transform(fps) # ogni vettore scalato per avere norma unitaria (evitando che quelli più lunghi abbiano più peso solo per la lunghezza)
 
-# --- 4. CV interna + valutazione test across seeds ---
+# --- CV interna + test (per seed) ---
 seeds                = list(range(10))
 cv_stats             = {'RF': [], 'SVR': []} # ogni lista conterrà 10 dizionari annidati (per ogni seed), ognuna con le metriche delle performance in CV
 test_stats           = {'RF': [], 'SVR': []} # ogni lista conterrà 10 dizionari annidati (per ogni seed), ognuna con le metriche delle performance sul test set
@@ -67,10 +62,10 @@ test_scores_per_seed = {'RF': [], 'SVR': []} # memorizzo valori di predizione CO
 y_tests_per_seed     = [] # qui avrò liste annidate, per ogni seed, delle label di classificazione binaria predette in test
 
 for seed in seeds:
-    # 4.1 split esterno (suddivisone proporzionata tra train e test)
+    # split esterno (suddivisone proporzionata tra train e test)
     X_tr, X_te, y_tr, y_te = train_test_split(X_all, y_all,test_size=0.2,random_state=seed,stratify=y_all )
 
-    # 4.2 CV interna 5-fold sul training set
+    # CV interna 5-fold sul training set
     skf   = StratifiedKFold(n_splits=5, shuffle=True, random_state=seed) # variante cv che mantiene le proporzioni delle classi
     # creo un dizionario con due liste, ognuna con array di 0 inizialmente (utili a memorizzare la predizione binaria dell'attività)
     preds = {'RF': np.zeros(len(y_tr)), 'SVR': np.zeros(len(y_tr))} # ogni indice verrà riempito nel momento in cui quella molecola finirà nel validation
@@ -93,7 +88,11 @@ for seed in seeds:
         # score che rappresentano la confidenza del modello nel classificare come "1"
         preds['SVR'][val_idx] = svr.predict(X_val) # associo anche qui i valori ai corrispondenti indici in preds[SVR]
 
+<<<<<<< Updated upstream
     # 4.3 raccolgo metriche CV (validation folds)
+=======
+    # raccogli metriche CV (validation folds)
+>>>>>>> Stashed changes
     for model in ['RF','SVR']:
         scr = preds[model] # isolo gli score (scr) di predizione in validation per ogni modello
         bin_pred = (scr >= 0.5).astype(int) # creo lista binaria di 0/1, leggendo scr, usando la soglia di riferimento
@@ -107,7 +106,7 @@ for seed in seeds:
             'auc': roc_auc_score(y_tr, scr)
         })
 
-    # 4.4 valutazione su test set
+    # valutazione su test set
     rf_full      = RandomForestClassifier(random_state=seed).fit(X_tr, y_tr) # riaddestro sull'intero test set (80% di partenza)
     svr_full     = SVR(kernel='linear').fit(X_tr, y_tr)
     test_scr_rf  = rf_full.predict_proba(X_te)[:,1] # predico sul test set (20% di partenza)
@@ -132,20 +131,20 @@ for seed in seeds:
             'auc': roc_auc_score(y_true, scr)
         })
 
-    # 4.5 (OPZIONALE!!! e un pò inutile forse...) salva predizioni "seed=0"
-    if seed == 0:
-        pd.DataFrame({
-            'orig_index': np.arange(len(y_tr)),
-            'score_RF': preds['RF'],
-            'score_SVR': preds['SVR']
-        }).to_csv('cv_predictions_seed0.csv', index=False)
-        pd.DataFrame({
-            'orig_index': np.arange(len(y_te)),
-            'score_RF': test_scr_rf,
-            'score_SVR': test_scr_svr
-        }).to_csv('test_predictions_seed0.csv', index=False)
+    # (OPZIONALE!!! un pò inutile forse...) salva predizioni "seed=0"
+    # if seed == 0:
+    #     pd.DataFrame({
+    #         'orig_index': np.arange(len(y_tr)),
+    #         'score_RF': preds['RF'],
+    #         'score_SVR': preds['SVR']
+    #     }).to_csv('cv_predictions_seed0.csv', index=False)
+    #     pd.DataFrame({
+    #         'orig_index': np.arange(len(y_te)),
+    #         'score_RF': test_scr_rf,
+    #         'score_SVR': test_scr_svr
+    #     }).to_csv('test_predictions_seed0.csv', index=False)
 
-# --- 5. Esporto summary mean±std in un’unica colonna ---
+# --- Esporto summary mean±std in un’unica colonna ---
 def make_summary(stats_dict, out_csv):
     """
     Prendo in input il dizionario con le metriche delle performance (per cv o test) e la stringa per il nome del csv
@@ -172,7 +171,7 @@ def make_summary(stats_dict, out_csv):
 make_summary(cv_stats,   'cv_performance_summary.csv')
 make_summary(test_stats, 'test_performance_summary.csv')
 
-# --- 6. Plot ROC per “best seed” di ciascun modello ---
+# --- Plot ROC per “best seed” di ciascun modello ---
 
 # calcolo gli AUC score, per i due modelli, iterando sui seed e li salvo in una lista
 auc_list_rf  = [roc_auc_score(y_tests_per_seed[i], test_scores_per_seed['RF'][i]) for i in range(len(seeds))]
@@ -201,6 +200,6 @@ plt.savefig('roc_best_seeds.png')
 print("Generati:")
 print("- cv_performance_summary.csv")
 print("- test_performance_summary.csv")
-print("- cv_predictions_seed0.csv")
-print("- test_predictions_seed0.csv")
+# print("- cv_predictions_seed0.csv")
+# print("- test_predictions_seed0.csv")
 print("- roc_best_seeds.png")
