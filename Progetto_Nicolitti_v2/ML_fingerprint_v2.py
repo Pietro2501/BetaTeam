@@ -169,8 +169,8 @@ pd.DataFrame([test_stats['svc']]).to_csv("test_svc_metrics.csv", index=False)
 
 def metrics(df):
     """
-    Calcola diverse metriche di classificazione binaria a partire da un DataFrame
-    contenente le etichette reali, le predizioni binarie e i punteggi continui del modello.
+    Calcola diverse metriche di classificazione a partire da un DataFrame
+    contenente le etichette reali, le predizioni binarie e score di predizione del modello.
 
     :param df: DataFrame Pandas contenente almeno tre colonne:
     :return: Series Pandas con le metriche calcolate, ciascuna arrotondata a 3 cifre decimali.
