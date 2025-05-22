@@ -1,3 +1,6 @@
+
+# ------------------------------------------- PERSONA 1 -------------------------------------------
+
 import os
 import matplotlib.pyplot as plt
 import numpy as np
@@ -73,6 +76,9 @@ print("\nHo generato correttamente 9 cartelle (seed da 1 a 9), ognuna con 4 file
       "\n- colonna di indici delle molecole in train"
       "\n- colonna di indici delle molecole in test\n")
 
+
+# ------------------------------------------- PERSONA 2 -------------------------------------------
+
 # --- CV interna 5-fold sul training set ---
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=0) # inizializza la CV
 cv_rf_rows, cv_svc_rows = [], [] # liste per salvare predizioni RF e SVC
@@ -121,6 +127,9 @@ pd.DataFrame(cv_svc_rows).to_csv("cv_svc_all_folds.csv", index=False)
 pd.DataFrame(cv_stats['rf']).to_csv("cv_rf_metrics_per_fold.csv", index=False)
 pd.DataFrame(cv_stats['svc']).to_csv("cv_svc_metrics_per_fold.csv", index=False)
 
+
+# ------------------------------------------- PERSONA 3 -------------------------------------------
+
 # --- Test set ---
 test_stats = {'rf': {}, 'svc': {}}
 rf_full = RandomForestClassifier(random_state=0).fit(X_tr, y_tr) # addestro modello RF su tutto il training set iniziale (80%)
@@ -158,28 +167,28 @@ for model_name, scores, bin_pred in zip(["rf", "svc"], [test_scr_rf, test_scr_sv
 pd.DataFrame([test_stats['rf']]).to_csv("test_rf_metrics.csv", index=False)
 pd.DataFrame([test_stats['svc']]).to_csv("test_svc_metrics.csv", index=False)
 
+def metrics(df):
+    """
+    Calcola diverse metriche di classificazione binaria a partire da un DataFrame
+    contenente le etichette reali, le predizioni binarie e i punteggi continui del modello.
+
+    :param df: DataFrame Pandas contenente almeno tre colonne:
+    :return: Series Pandas con le metriche calcolate, ciascuna arrotondata a 3 cifre decimali.
+    """
+    tn, fp, fn, tp = confusion_matrix(df['label'], df['pred']).ravel()
+    return pd.Series({
+        'accuracy': round(accuracy_score(df['label'], df['pred']), 3),
+        'sensitivity': round(recall_score(df['label'], df['pred']), 3),
+        'specificity': round(tn / (tn + fp), 3),
+        'mcc': round(matthews_corrcoef(df['label'], df['pred']), 3),
+        'auc': round(roc_auc_score(df['label'], df['score']), 3)
+    })
+
 # Metriche separate per in-domain e out-domain in df separati
 for model_name, scores, bin_pred in zip(["rf", "svc"], [test_scr_rf, test_scr_svc], [bin_rf, bin_svc]):
     y_pred_df = pd.DataFrame({'score': scores, 'label': y_te, 'pred': bin_pred, 'in_domain': mask_in_domain, 'index': idx_te})
     in_dom = y_pred_df[y_pred_df['in_domain'] == True]
     out_dom = y_pred_df[y_pred_df['in_domain'] == False]
-
-    def metrics(df):
-        """
-        Calcola diverse metriche di classificazione binaria a partire da un DataFrame
-        contenente le etichette reali, le predizioni binarie e i punteggi continui del modello.
-
-        :param df: DataFrame Pandas contenente almeno tre colonne:
-        :return: Series Pandas con le metriche calcolate, ciascuna arrotondata a 3 cifre decimali.
-        """
-        tn, fp, fn, tp = confusion_matrix(df['label'], df['pred']).ravel()
-        return pd.Series({
-            'accuracy':  round(accuracy_score(df['label'], df['pred']), 3),
-            'sensitivity':  round(recall_score(df['label'], df['pred']), 3),
-            'specificity':  round(tn / (tn + fp), 3),
-            'mcc':  round(matthews_corrcoef(df['label'], df['pred']), 3),
-            'auc':  round(roc_auc_score(df['label'], df['score']), 3)
-        })
 
     metrics_in = metrics(in_dom)
     metrics_out = metrics(out_dom)
