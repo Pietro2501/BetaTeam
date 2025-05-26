@@ -1,5 +1,5 @@
 
-# ------------------------------------------- PERSONA 1 -------------------------------------------
+# ------------------------------------------- PPIETRO DI SPALDRO -------------------------------------------
 
 import os
 import matplotlib.pyplot as plt
@@ -77,7 +77,7 @@ print("\nHo generato correttamente 9 cartelle (seed da 1 a 9), ognuna con 4 file
       "\n- colonna di indici delle molecole in test\n")
 
 
-# ------------------------------------------- PERSONA 2 -------------------------------------------
+# ------------------------------------------- SALVATORE CHIARIELLO -------------------------------------------
 
 # --- CV interna 5-fold sul training set ---
 skf = StratifiedKFold(n_splits=5, shuffle=True, random_state=0) # inizializza la CV
@@ -128,7 +128,7 @@ pd.DataFrame(cv_stats['rf']).to_csv("cv_rf_metrics_per_fold.csv", index=False)
 pd.DataFrame(cv_stats['svc']).to_csv("cv_svc_metrics_per_fold.csv", index=False)
 
 
-# ------------------------------------------- PERSONA 3 -------------------------------------------
+# ------------------------------------------- CARMELO SMALDINO -------------------------------------------
 
 # --- Test set ---
 test_stats = {'rf': {}, 'svc': {}}
@@ -142,7 +142,7 @@ test_scr_svc = svc_full.predict_proba(X_te)[:, 1] # score probabilistici SVC
 fp_min, fp_max = X_tr.min(axis=0), X_tr.max(axis=0) # definisco due vettori min e max per ogni colonna nel training set
 mask_in_domain = np.all((X_te >= fp_min) & (X_te <= fp_max), axis=1) # controllo, per ogni molecola in test, l'appartenenza di ogni feature al range min-max definito in training.
                                                                      # Genero un array booleano in output lungo quanto il numero di molecole in test (true per le molecole che
-                                                                     # rispettano l'appartenenza a ai range min-max di ogni feature, false per tutte le altre)
+                                                                     # rispettano l'appartenenza ai range min-max di ogni feature, false per tutte le altre)
 
 # Stampa numero molecole in-domain / out-of-domain
 print(f"Test set seed 0: {mask_in_domain.sum()} molecole in-domain, {len(mask_in_domain) - mask_in_domain.sum()} out-of-domain\n")
